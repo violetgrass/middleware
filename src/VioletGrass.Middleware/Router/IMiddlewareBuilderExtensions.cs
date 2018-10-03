@@ -1,3 +1,4 @@
+using System;
 using VioletGrass.Middleware.Router;
 
 namespace VioletGrass.Middleware
@@ -8,24 +9,24 @@ namespace VioletGrass.Middleware
         {
             if (self == null)
             {
-                throw new System.ArgumentNullException(nameof(self));
+                throw new ArgumentNullException(nameof(self));
             }
 
             if (routes == null)
             {
-                throw new System.ArgumentNullException(nameof(routes));
+                throw new ArgumentNullException(nameof(routes));
             }
 
             foreach (var route in routes)
             {
                 if (route.IsApplicable == null)
                 {
-                    throw new System.ArgumentNullException(nameof(route.IsApplicable));
+                    throw new ArgumentNullException(nameof(route.IsApplicable));
                 }
 
                 if (route.MiddlewareBuilderForRoute == null)
                 {
-                    throw new System.ArgumentNullException(nameof(route.MiddlewareBuilderForRoute));
+                    throw new ArgumentNullException(nameof(route.MiddlewareBuilderForRoute));
                 }
             }
 

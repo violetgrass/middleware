@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace VioletGrass.Middleware.Router
 {
-    public static class InternalRouter
+    internal static class InternalRouter
     {
         public static Func<MiddlewareDelegate, MiddlewareDelegate> CreateMiddlewareFactory(IMiddlewareBuilder self, Route[] routes)
         {

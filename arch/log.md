@@ -27,8 +27,15 @@ Core
 
 - This product considers all invokable *endpoints* as a final middleware. There is no secondary infrastructure (like in ASP.NET Core the MVC Routing/Controller/Action concepts).
 - A middleware stack needs to branch to dispatch messages to multiple *endpoints*. This process is called *routing*.
-- The central router method is `.UseRoute(Predicate<Context> isApplicable, Action<IMiddlewareBuilder> middlewareBuilderForRoute)`. The branches entry condition is defined in the isApplicable predicate and the branch middleware stack is built by the provided builder.
+- The central router method is `.UseRoutes(new Route(Predicate<Context> isApplicable, Action<IMiddlewareBuilder> middlewareBuilderForBranch), ...)`. The branches entry condition is defined in the isApplicable predicate and the branch middleware stack is built by the provided builder.
 
-Convenience
+# 2018-10-03 StringRouter Router
 
-- 
+- Integration Idea:
+  - Use a middleware *stack specific routing key extractor* (e.g. selecting the provided routing key from the message queue system)
+  - Use a ordered list of regexes to match the routing key string and extract their named groups as *route data*.
+  - Use the *route data* to match against expectation to branch the middleware stack using the generic router
+
+- Helper Method: `StringRouter.Match(string key, string value)` builds a predicate which checks the *route data* in the context for a match.
+- Extension Method: `IMiddlewareBuilder.UseRoutingKey(Func<Context, string> routingKeySelector)` is used to define the extractor for the routing key
+- Extension Method: `IMiddlewareBuilder.UseRoutingDataExtractor(string[] routingPatterns)` is used to extract the route data. 
