@@ -4,27 +4,42 @@ using System.Text.RegularExpressions;
 
 namespace VioletGrass.Middleware.Router
 {
-    public class StringRouter
+    public static class StringRouter
     {
         public static Predicate<Context> Match(string key, string value)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentException("message", nameof(key));
+            }
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("message", nameof(value));
+            }
+
             return context =>
             {
                 var routeData = context.Features.Get<RouteData>();
 
-                return routeData.Match(key, value);
+                return routeData != null && routeData.Match(key, value);
             };
         }
 
         public static Func<MiddlewareDelegate, MiddlewareDelegate> CreateMiddlewareFactoryForRoutingKeyExtractor(Func<Context, string> routingKeySelector)
         {
+            if (routingKeySelector == null)
+            {
+                throw new ArgumentNullException(nameof(routingKeySelector));
+            }
+
             return next =>
             {
                 return async context =>
                 {
                     var routingKey = routingKeySelector(context);
 
-                    var routeData = context.Features.Set(new RouteData());
+                    var routeData = context.Features.Get<RouteData>() ?? context.Features.Set(new RouteData());
 
                     routeData.OriginalRoutingKey = routingKey;
 
@@ -35,13 +50,18 @@ namespace VioletGrass.Middleware.Router
 
         public static Func<MiddlewareDelegate, MiddlewareDelegate> CreateMiddlewareFactoryForRouteDataExtractor(string[] routePatterns)
         {
+            if (routePatterns == null)
+            {
+                throw new ArgumentNullException(nameof(routePatterns));
+            }
+
             return next =>
             {
                 var regexPatterns = routePatterns.Select(routePattern => new Regex(routePattern, RegexOptions.Compiled)).ToArray();
 
                 return async context =>
                 {
-                    var routeData = context.Features.Get<RouteData>();
+                    var routeData = context.Features.Get<RouteData>() ?? context.Features.Set(new RouteData());
 
                     foreach (var routePattern in regexPatterns)
                     {

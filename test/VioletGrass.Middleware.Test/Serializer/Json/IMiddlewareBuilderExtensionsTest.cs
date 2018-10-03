@@ -11,7 +11,7 @@ namespace VioletGrass.Middleware
             public string A { get; set; }
             public string B { get; set; }
         }
-        private class TestEndpoint
+        private class TestEndpoint2
         {
             public Demo Message { get; private set; }
 
@@ -26,7 +26,7 @@ namespace VioletGrass.Middleware
         public async Task IMiddlewareBuilder_UseJson_Simple()
         {
             // arrange
-            var instance = new TestEndpoint();
+            var instance = new TestEndpoint2();
             var stack = new MiddlewareBuilder()
                 .UseJsonSerializer<Demo>(ctx => ctx.Features.Get<string>(), "message")
                 .UseMethodEndpoint(instance, "Foo")

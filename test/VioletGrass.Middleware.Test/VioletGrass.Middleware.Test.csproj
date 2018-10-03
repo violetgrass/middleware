@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\VioletGrass.Middleware\VioletGrass.Middleware.csproj" />
+    <ProjectReference Include="..\..\src\VioletGrass.Middleware.Serializer.Json\VioletGrass.Middleware.Serializer.Json.csproj" />
   </ItemGroup>
 
 </Project>
