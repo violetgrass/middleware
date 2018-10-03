@@ -20,7 +20,7 @@ steps:
     dotnet build --configuration $(buildConfiguration)
     dotnet test ./test/VioletGrass.Middleware.Test/VioletGrass.Middleware.Test.csproj --configuration $(buildConfiguration) --logger trx
     dotnet pack src/VioletGrass.Middleware/VioletGrass.Middleware.csproj --no-build --configuration $(buildConfiguration) --output $BUILD_ARTIFACTSTAGINGDIRECTORY
-    dotnet pack src/VioletGrass.Middleware.Experiments.StringRouter/VioletGrass.Middleware.Experiments.StringRouter.csproj --no-build --configuration $(buildConfiguration) --output $BUILD_ARTIFACTSTAGINGDIRECTORY
+    dotnet pack src/VioletGrass.Middleware.Serializer.Json/VioletGrass.Middleware.Serializer.Json.csproj --no-build --configuration $(buildConfiguration) --output $BUILD_ARTIFACTSTAGINGDIRECTORY
   displayName: 'dotnet build & dotnet test'
 
 - task: PublishTestResults@2
