@@ -1,6 +1,7 @@
 using System;
+using VioletGrass.Middleware.Router;
 
-namespace VioletGrass.Middleware.Router
+namespace VioletGrass.Middleware
 {
     public static class IMiddlewareBuilderExtensions_StringRouter
     {
@@ -9,7 +10,7 @@ namespace VioletGrass.Middleware.Router
             return self.Use(StringRouter.CreateMiddlewareFactoryForRoutingKeyExtractor(routingKeySelector));
         }
 
-        public static IMiddlewareBuilder UseRoutingDataExtractor(this IMiddlewareBuilder self, string[] routePatterns)
+        public static IMiddlewareBuilder UseRoutingDataExtractor(this IMiddlewareBuilder self, params string[] routePatterns)
         {
             return self.Use(StringRouter.CreateMiddlewareFactoryForRouteDataExtractor(routePatterns));
         }

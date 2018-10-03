@@ -6,11 +6,6 @@ namespace VioletGrass.Middleware
 {
     public partial class IMiddlewareBuilderExtensionsTest
     {
-        private class Demo
-        {
-            public string A { get; set; }
-            public string B { get; set; }
-        }
         private class TestEndpoint2
         {
             public Demo Message { get; private set; }

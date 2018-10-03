@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using VioletGrass.Middleware.Features;
+using VioletGrass.Middleware.Router;
 using Xunit;
 
 namespace VioletGrass.Middleware
@@ -56,6 +57,33 @@ namespace VioletGrass.Middleware
 
             // assert
             Assert.Equal("AB", instance.Trace);
+        }
+
+        [Fact]
+        public async Task IMiddlewareBuilder_UseMethodEndpoint_Full()
+        {
+            // arrange
+            var instance = new TraceableEndpoint();
+            var middleware = new MiddlewareBuilder()
+                .UseRoutingKey(ctx => ctx.Features.Get<Message>().RoutingKey)
+                .UseRoutingDataExtractor("^game-(?<action>.*)$")
+                .UseRoutes(
+                    new Route(StringRouter.Match("action", "create"), branchBuilder => branchBuilder
+                        .UseJsonSerializer<Demo>(ctx => ctx.Features.Get<Message>().Body, "message")
+                        .UseMethodEndpoint(instance, nameof(instance.ProcessMessage))
+                    )
+                )
+                .Build();
+
+            // act
+            var context = new Context();
+            context.Features.Set(new Message("game-create", "{ \"A\": \"a\", \"B\": \"b\" }"));
+            await middleware(context);
+
+            // assert
+            Assert.NotNull(instance.Message);
+            Assert.Equal("a", instance.Message.A);
+            Assert.Equal("b", instance.Message.B);
         }
     }
 }
