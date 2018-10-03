@@ -6,7 +6,7 @@ using Xunit;
 
 namespace VioletGrass.Middleware
 {
-    public partial class IMiddlewareBuilderExtensionsTest
+    public class MethodInfoEndpointTest
     {
         [Fact]
         public void IMiddlewareBuilder_UseMethodEndpoint_Null()

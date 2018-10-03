@@ -23,7 +23,7 @@ namespace VioletGrass.Middleware
         }
 
         [Fact]
-        public async Task IMiddlewareBuilder_UseJson_Simple()
+        public async Task IMiddlewareBuilder_UseJsonSerializer_Simple()
         {
             // arrange
             var instance = new TestEndpoint2();

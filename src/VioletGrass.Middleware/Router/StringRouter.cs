@@ -26,6 +26,21 @@ namespace VioletGrass.Middleware.Router
             };
         }
 
+        public static Predicate<Context> ByRoutingKey(string routingKey)
+        {
+            if (string.IsNullOrWhiteSpace(routingKey))
+            {
+                throw new ArgumentException("message", nameof(routingKey));
+            }
+
+            return context =>
+            {
+                var routeData = context.Features.Get<RouteData>();
+
+                return routeData != null && routeData.OriginalRoutingKey == routingKey;
+            };
+        }
+
         public static Func<MiddlewareDelegate, MiddlewareDelegate> CreateMiddlewareFactoryForRoutingKeyExtractor(Func<Context, string> routingKeySelector)
         {
             if (routingKeySelector == null)

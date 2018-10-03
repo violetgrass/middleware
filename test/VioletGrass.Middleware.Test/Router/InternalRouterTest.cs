@@ -4,10 +4,10 @@ using Xunit;
 
 namespace VioletGrass.Middleware.Router
 {
-    public class IMiddlewareBuilderExtensionsTest
+    public class InternalRouterTest
     {
         [Fact]
-        public async Task IMiddlewareBuilderExtensions_UseRoute_Empty()
+        public async Task IMiddlewareBuilder_UseRoute_Empty()
         {
             // arrange
             var builder = new MiddlewareBuilder();
@@ -30,7 +30,7 @@ namespace VioletGrass.Middleware.Router
         }
 
         [Fact]
-        public async Task IMiddlewareBuilderExtensions_UseRoute_OneBranchMet()
+        public async Task IMiddlewareBuilder_UseRoute_OneBranchMet()
         {
             // arrange
             var builder = new MiddlewareBuilder();
@@ -57,7 +57,7 @@ namespace VioletGrass.Middleware.Router
         }
 
         [Fact]
-        public async Task IMiddlewareBuilderExtensions_UseRoute_OneBranchMetMultipleMiddleware()
+        public async Task IMiddlewareBuilder_UseRoute_OneBranchMetMultipleMiddleware()
         {
             // arrange
             var builder = new MiddlewareBuilder();
@@ -85,7 +85,7 @@ namespace VioletGrass.Middleware.Router
         }
 
         [Fact]
-        public async Task IMiddlewareBuilderExtensions_UseRoute_OneBranchNotMet()
+        public async Task IMiddlewareBuilder_UseRoute_OneBranchNotMet()
         {
             // arrange
             var builder = new MiddlewareBuilder();
@@ -112,7 +112,7 @@ namespace VioletGrass.Middleware.Router
         }
 
         [Fact]
-        public async Task IMiddlewareBuilderExtensions_UseRoute_FirstBranchTaken()
+        public async Task IMiddlewareBuilder_UseRoute_FirstBranchTaken()
         {
             // arrange
             var builder = new MiddlewareBuilder();
@@ -144,7 +144,7 @@ namespace VioletGrass.Middleware.Router
             Assert.Equal("AC", path.Trace);
         }
         [Fact]
-        public async Task IMiddlewareBuilderExtensions_UseRoute_FirstBranchSkipped()
+        public async Task IMiddlewareBuilder_UseRoute_FirstBranchSkipped()
         {
             // arrange
             var builder = new MiddlewareBuilder();
