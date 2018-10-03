@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace VioletGrass.Middleware
 {
-    public static class IMiddlewareBuilderExtensions
+    public static partial class IMiddlewareBuilderExtensions
     {
         public static IMiddlewareBuilder Use(this IMiddlewareBuilder self, IMiddleware middleware)
             => self.Use(middleware.InvokeAsync);

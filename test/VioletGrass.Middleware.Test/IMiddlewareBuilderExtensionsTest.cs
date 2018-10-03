@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace VioletGrass.Middleware.Test
+namespace VioletGrass.Middleware
 {
     public class TestMiddleware : IMiddleware
     {
@@ -21,7 +21,7 @@ namespace VioletGrass.Middleware.Test
             return next(context);
         }
     }
-    public class IMiddlewareBuilderExtensionsTest
+    public partial class IMiddlewareBuilderExtensionsTest
     {
         [Fact]
         public async Task IMiddlewareBuilderExtensions_Use_Lambda()

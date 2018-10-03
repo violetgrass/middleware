@@ -3,7 +3,7 @@ using VioletGrass.Middleware.Router;
 
 namespace VioletGrass.Middleware
 {
-    public static class IMiddlewareBuilderExtensions_Router
+    public static partial class IMiddlewareBuilderExtensions
     {
         public static IMiddlewareBuilder UseRoutes(this IMiddlewareBuilder self, params Route[] routes)
         {

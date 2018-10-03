@@ -9,7 +9,7 @@ VioletGrass Middleware is a universal middleware pipeline intended to be added t
 Creation of a simple middleware
 
 ````csharp
-var executeAsync = new MiddlewareBuilder()
+var stack = new MiddlewareBuilder()
     .Use(async (context, next) => {
         Console.Write("Violet"); 
         await next(context); 
@@ -22,7 +22,8 @@ var executeAsync = new MiddlewareBuilder()
 
 var x = new Context();
 
-await executeAsync(x); // writes "VioletGrass"
+// this is just a function
+await stack(x); // writes "VioletGrass"
 ````
 
 ## Experimental StringRouter
