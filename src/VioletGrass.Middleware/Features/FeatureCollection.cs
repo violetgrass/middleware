@@ -14,7 +14,16 @@ namespace VioletGrass.Middleware.Features
             => _features.GetEnumerator();
 
         public TFeature Get<TFeature>() where TFeature : class
-            => _features[typeof(TFeature)] as TFeature;
+        {
+            TFeature result = default;
+
+            if (_features.TryGetValue(typeof(TFeature), out var entry))
+            {
+                result = entry as TFeature;
+            }
+
+            return result;
+        }
 
         public TFeature Set<TFeature>(TFeature instance) where TFeature : class
         {
