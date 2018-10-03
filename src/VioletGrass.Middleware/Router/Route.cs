@@ -9,8 +9,8 @@ namespace VioletGrass.Middleware.Router
         public Action<IMiddlewareBuilder> MiddlewareBuilderForRoute { get; }
         public Route(Predicate<Context> isApplicable, Action<IMiddlewareBuilder> middlewareBuilderForBranch)
         {
-            IsApplicable = isApplicable;
-            MiddlewareBuilderForRoute = middlewareBuilderForBranch;
+            IsApplicable = isApplicable ?? throw new ArgumentNullException(nameof(isApplicable));
+            MiddlewareBuilderForRoute = middlewareBuilderForBranch ?? throw new ArgumentNullException(nameof(middlewareBuilderForBranch));
         }
     }
 }
