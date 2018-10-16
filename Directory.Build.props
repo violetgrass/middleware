@@ -1,0 +1,14 @@
+<Project>
+ <PropertyGroup>
+   <Version>1.0.0</Version>
+ </PropertyGroup>
+
+ <PropertyGroup>
+   <Authors>tthiery</Authors>
+   <Description>A general purpose middleware</Description>
+   <PackageTags>middleware</PackageTags>
+   <PackageProjectUrl>https://github.com/violetgrass/middleware</PackageProjectUrl>
+   <RepositoryUrl>https://github.com/violetgrass/middleware</RepositoryUrl>
+   <PackageLicenseUrl>https://github.com/violetgrass/middleware/blob/master/LICENSE</PackageLicenseUrl>
+ </PropertyGroup>
+</Project>
