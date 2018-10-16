@@ -4,7 +4,7 @@
  </PropertyGroup>
 
  <PropertyGroup>
-   <Authors>tthiery</Authors>
+   <Authors>thiery</Authors>
    <Description>A general purpose middleware</Description>
    <PackageTags>middleware</PackageTags>
    <PackageProjectUrl>https://github.com/violetgrass/middleware</PackageProjectUrl>
