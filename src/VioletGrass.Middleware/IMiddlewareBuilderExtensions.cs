@@ -8,7 +8,7 @@ namespace VioletGrass.Middleware
         public static IMiddlewareBuilder<TContext> Use<TContext>(this IMiddlewareBuilder<TContext> self, IMiddleware<TContext> middleware) where TContext : Context
             => self.Use(middleware.InvokeAsync);
 
-        public static IMiddlewareBuilder<TContext> Use<TContext>(this IMiddlewareBuilder<TContext> self, Func<Context, MiddlewareDelegate<TContext>, Task> middleware) where TContext : Context
+        public static IMiddlewareBuilder<TContext> Use<TContext>(this IMiddlewareBuilder<TContext> self, Func<TContext, MiddlewareDelegate<TContext>, Task> middleware) where TContext : Context
             => self.Use(factoryInputNext =>
             {
                 return context => middleware(context, factoryInputNext);
