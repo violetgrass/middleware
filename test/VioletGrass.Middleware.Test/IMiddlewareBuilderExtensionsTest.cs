@@ -5,7 +5,7 @@ using Xunit;
 
 namespace VioletGrass.Middleware
 {
-    public class TestMiddleware : IMiddleware
+    public class TestMiddleware : IMiddleware<Context>
     {
         private readonly List<string> _list;
 
@@ -14,7 +14,7 @@ namespace VioletGrass.Middleware
             this._list = list;
         }
 
-        public Task InvokeAsync(Context context, MiddlewareDelegate next)
+        public Task InvokeAsync(Context context, MiddlewareDelegate<Context> next)
         {
             _list.Add(nameof(TestMiddleware));
 
@@ -27,7 +27,7 @@ namespace VioletGrass.Middleware
         public async Task IMiddlewareBuilderExtensions_Use_Lambda()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var list = new List<string>();
 
             // act
@@ -47,7 +47,7 @@ namespace VioletGrass.Middleware
         public async Task IMiddlewareBuilderExtensions_Use_IMiddleware()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var list = new List<string>();
 
             // act

@@ -2,12 +2,12 @@ using System;
 
 namespace VioletGrass.Middleware
 {
-    public interface IMiddlewareBuilder
+    public interface IMiddlewareBuilder<TContext> where TContext : Context
     {
-        IMiddlewareBuilder Use(Func<MiddlewareDelegate, MiddlewareDelegate> middlewareBuilder);
+        IMiddlewareBuilder<TContext> Use(Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> middlewareBuilder);
 
-        IMiddlewareBuilder New();
+        IMiddlewareBuilder<TContext> New();
 
-        MiddlewareDelegate Build();
+        MiddlewareDelegate<TContext> Build();
     }
 }

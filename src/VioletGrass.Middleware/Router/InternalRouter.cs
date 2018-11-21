@@ -5,7 +5,7 @@ namespace VioletGrass.Middleware.Router
 {
     internal static class InternalRouter
     {
-        public static Func<MiddlewareDelegate, MiddlewareDelegate> CreateMiddlewareFactory(IMiddlewareBuilder self, Route[] routes)
+        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> self, Route<TContext>[] routes) where TContext : Context
         {
             return next =>
             {
@@ -17,7 +17,7 @@ namespace VioletGrass.Middleware.Router
             };
         }
 
-        private static MiddlewareDelegate CreateMiddleware(MiddlewareDelegate next, MiddlewareBranch[] branches)
+        private static MiddlewareDelegate<TContext> CreateMiddleware<TContext>(MiddlewareDelegate<TContext> next, MiddlewareBranch<TContext>[] branches) where TContext : Context
         {
             if (next == null)
             {
@@ -51,7 +51,7 @@ namespace VioletGrass.Middleware.Router
             };
         }
 
-        private static MiddlewareBranch[] BuildMiddlewareBranches(IMiddlewareBuilder parentBuilder, Route[] routes)
+        private static MiddlewareBranch<TContext>[] BuildMiddlewareBranches<TContext>(IMiddlewareBuilder<TContext> parentBuilder, Route<TContext>[] routes) where TContext : Context
         {
             if (parentBuilder == null)
             {
@@ -71,7 +71,7 @@ namespace VioletGrass.Middleware.Router
 
                 var branchStack = branchBuilder.Build();
 
-                return new MiddlewareBranch(route.IsApplicable, branchStack);
+                return new MiddlewareBranch<TContext>(route.IsApplicable, branchStack);
             }).ToArray();
         }
     }

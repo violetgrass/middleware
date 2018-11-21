@@ -5,16 +5,16 @@ namespace VioletGrass.Middleware
 {
     public static partial class IMiddlewareBuilderExtensions
     {
-        public static IMiddlewareBuilder Use(this IMiddlewareBuilder self, IMiddleware middleware)
+        public static IMiddlewareBuilder<TContext> Use<TContext>(this IMiddlewareBuilder<TContext> self, IMiddleware<TContext> middleware) where TContext : Context
             => self.Use(middleware.InvokeAsync);
 
-        public static IMiddlewareBuilder Use(this IMiddlewareBuilder self, Func<Context, MiddlewareDelegate, Task> middleware)
+        public static IMiddlewareBuilder<TContext> Use<TContext>(this IMiddlewareBuilder<TContext> self, Func<Context, MiddlewareDelegate<TContext>, Task> middleware) where TContext : Context
             => self.Use(factoryInputNext =>
             {
                 return context => middleware(context, factoryInputNext);
             });
 
-        public static IMiddlewareBuilder Use<TMiddleware>(this IMiddlewareBuilder self) where TMiddleware : IMiddleware, new()
+        public static IMiddlewareBuilder<TContext> Use<TMiddleware, TContext>(this IMiddlewareBuilder<TContext> self) where TContext : Context where TMiddleware : IMiddleware<TContext>, new()
             => self.Use(new TMiddleware());
     }
 }

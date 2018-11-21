@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 
 namespace VioletGrass.Middleware
 {
-    public interface IMiddleware
+    public interface IMiddleware<TContext> where TContext : Context
     {
-        Task InvokeAsync(Context context, MiddlewareDelegate next);
+        Task InvokeAsync(Context context, MiddlewareDelegate<TContext> next);
     }
 }

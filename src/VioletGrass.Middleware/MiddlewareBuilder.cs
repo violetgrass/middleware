@@ -5,22 +5,22 @@ using System.Threading.Tasks;
 namespace VioletGrass.Middleware
 {
 
-    public class MiddlewareBuilder : IMiddlewareBuilder
+    public class MiddlewareBuilder<TContext> : IMiddlewareBuilder<TContext> where TContext : Context
     {
-        private List<Func<MiddlewareDelegate, MiddlewareDelegate>> _factories = new List<Func<MiddlewareDelegate, MiddlewareDelegate>>();
+        private List<Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>>> _factories = new List<Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>>>();
 
-        public IMiddlewareBuilder Use(Func<MiddlewareDelegate, MiddlewareDelegate> middlewareFactory)
+        public IMiddlewareBuilder<TContext> Use(Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> middlewareFactory)
         {
             _factories.Add(middlewareFactory);
 
             return this;
         }
 
-        public MiddlewareDelegate Build()
+        public MiddlewareDelegate<TContext> Build()
         {
             _factories.Reverse();
 
-            MiddlewareDelegate current = TerminalMiddleware; // safeguard
+            MiddlewareDelegate<TContext> current = TerminalMiddleware; // safeguard
 
             foreach (var middlewareFactory in _factories)
             {
@@ -33,7 +33,7 @@ namespace VioletGrass.Middleware
         private Task TerminalMiddleware(Context context)
             => Task.CompletedTask;
 
-        public IMiddlewareBuilder New()
-            => new MiddlewareBuilder();
+        public IMiddlewareBuilder<TContext> New()
+            => new MiddlewareBuilder<TContext>();
     }
 }

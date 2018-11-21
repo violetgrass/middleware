@@ -7,10 +7,10 @@ namespace VioletGrass.Middleware
     {
         private StringBuilder _trace = new StringBuilder();
 
-        public Func<MiddlewareDelegate, MiddlewareDelegate> TestMiddleware(string before)
+        public Func<MiddlewareDelegate<Context>, MiddlewareDelegate<Context>> TestMiddleware(string before)
             => TestMiddleware(before, string.Empty);
 
-        public Func<MiddlewareDelegate, MiddlewareDelegate> TestMiddleware(string before, string after)
+        public Func<MiddlewareDelegate<Context>, MiddlewareDelegate<Context>> TestMiddleware(string before, string after)
         {
             return next => { return async context => { _trace.Append(before); await next(context); _trace.Append(after); }; };
         }

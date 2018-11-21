@@ -22,8 +22,8 @@ namespace VioletGrass.Middleware
         {
             // arrange
             var instance = new TestEndpoint2();
-            var stack = new MiddlewareBuilder()
-                .UseJsonSerializer<Demo>(ctx => ctx.Features.Get<string>(), "message")
+            var stack = new MiddlewareBuilder<Context>()
+                .UseJsonSerializer<Demo, Context>(ctx => ctx.Features.Get<string>(), "message")
                 .UseMethodEndpoint(instance, "Foo")
                 .Build();
 

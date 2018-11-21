@@ -13,7 +13,7 @@ namespace VioletGrass.Middleware
         public void IMiddlewareBuilder_UseMethodEndpoint_Null()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
 
             // act & assert
             Assert.Throws<ArgumentNullException>(() =>
@@ -44,7 +44,7 @@ namespace VioletGrass.Middleware
         {
             // arrange
             var instance = new TestEndpoint();
-            var middleware = new MiddlewareBuilder()
+            var middleware = new MiddlewareBuilder<Context>()
                 .UseMethodEndpoint(instance, "Foo")
                 .Build();
 
@@ -64,12 +64,12 @@ namespace VioletGrass.Middleware
         {
             // arrange
             var instance = new TraceableEndpoint();
-            var middleware = new MiddlewareBuilder()
+            var middleware = new MiddlewareBuilder<Context>()
                 .UseRoutingKey(ctx => ctx.Features.Get<Message>().RoutingKey)
                 .UseRoutingDataExtractor("^game-(?<action>.*)$")
                 .UseRoutes(
-                    new Route(StringRouter.Match("action", "create"), branchBuilder => branchBuilder
-                        .UseJsonSerializer<Demo>(ctx => ctx.Features.Get<Message>().Body, "message")
+                    new Route<Context>(StringRouter.Match("action", "create"), branchBuilder => branchBuilder
+                        .UseJsonSerializer<Demo, Context>(ctx => ctx.Features.Get<Message>().Body, "message")
                         .UseMethodEndpoint(instance, nameof(instance.ProcessMessage))
                     )
                 )

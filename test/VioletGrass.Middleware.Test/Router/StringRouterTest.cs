@@ -10,12 +10,12 @@ namespace VioletGrass.Middleware.Router
         {
             // arrange
             var tracer = new Tracer();
-            var middleware = new MiddlewareBuilder()
+            var middleware = new MiddlewareBuilder<Context>()
                 .Use(tracer.TestMiddleware("A"))
                 .UseRoutingKey(c => c.Features.Get<string>())
                 .UseRoutes(
-                    new Route(StringRouter.ByRoutingKey("xyz.create"), b => b.Use(tracer.TestMiddleware("B"))),
-                    new Route(StringRouter.ByRoutingKey("xyz.delete"), b => b.Use(tracer.TestMiddleware("C")))
+                    new Route<Context>(StringRouter.ByRoutingKey("xyz.create"), b => b.Use(tracer.TestMiddleware("B"))),
+                    new Route<Context>(StringRouter.ByRoutingKey("xyz.delete"), b => b.Use(tracer.TestMiddleware("C")))
                 )
                 .Build();
 
@@ -33,7 +33,7 @@ namespace VioletGrass.Middleware.Router
         {
             // arrange
             var tracer = new Tracer();
-            var middleware = new MiddlewareBuilder()
+            var middleware = new MiddlewareBuilder<Context>()
                 .Use(tracer.TestMiddleware("A"))
                 .UseRoutingKey(c => c.Features.Get<string>())
                 .UseRoutingDataExtractor(new string[] {
@@ -41,8 +41,8 @@ namespace VioletGrass.Middleware.Router
                     "^xyz\\.(?<action>.*)$"
                 })
                 .UseRoutes(
-                    new Route(StringRouter.Match("action", "create"), b => b.Use(tracer.TestMiddleware("B"))),
-                    new Route(StringRouter.Match("action", "delete"), b => b.Use(tracer.TestMiddleware("C")))
+                    new Route<Context>(StringRouter.Match("action", "create"), b => b.Use(tracer.TestMiddleware("B"))),
+                    new Route<Context>(StringRouter.Match("action", "delete"), b => b.Use(tracer.TestMiddleware("C")))
                 )
                 .Build();
 

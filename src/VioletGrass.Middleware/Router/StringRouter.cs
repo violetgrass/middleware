@@ -41,7 +41,7 @@ namespace VioletGrass.Middleware.Router
             };
         }
 
-        public static Func<MiddlewareDelegate, MiddlewareDelegate> CreateMiddlewareFactoryForRoutingKeyExtractor(Func<Context, string> routingKeySelector)
+        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactoryForRoutingKeyExtractor<TContext>(Func<TContext, string> routingKeySelector) where TContext : Context
         {
             if (routingKeySelector == null)
             {
@@ -63,7 +63,7 @@ namespace VioletGrass.Middleware.Router
             };
         }
 
-        public static Func<MiddlewareDelegate, MiddlewareDelegate> CreateMiddlewareFactoryForRouteDataExtractor(string[] routePatterns)
+        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactoryForRouteDataExtractor<TContext>(string[] routePatterns) where TContext : Context
         {
             if (routePatterns == null)
             {
@@ -74,7 +74,7 @@ namespace VioletGrass.Middleware.Router
             {
                 var regexPatterns = routePatterns.Select(routePattern => new Regex(routePattern, RegexOptions.Compiled)).ToArray();
 
-                return async context =>
+                return async (TContext context) =>
                 {
                     var routeData = context.Features.Get<RouteData>() ?? context.Features.Set(new RouteData());
 

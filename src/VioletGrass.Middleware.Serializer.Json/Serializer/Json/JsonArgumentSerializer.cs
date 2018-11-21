@@ -6,12 +6,12 @@ namespace VioletGrass.Middleware.Serializer.Json
 {
     internal static class JsonArgumentSerializer
     {
-        public static Func<MiddlewareDelegate, MiddlewareDelegate> CreateMiddlewareFactoryForJsonSerializer<T>(Func<Context, string> contentSelector, string argumentName)
+        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactoryForJsonSerializer<T, TContext>(Func<TContext, string> contentSelector, string argumentName) where TContext : Context
         {
-            return next => CreateMiddlewareForJsonSerializer<T>(next, contentSelector, argumentName);
+            return next => CreateMiddlewareForJsonSerializer<T, TContext>(next, contentSelector, argumentName);
         }
 
-        private static MiddlewareDelegate CreateMiddlewareForJsonSerializer<T>(MiddlewareDelegate next, Func<Context, string> contentSelector, string argumentName)
+        private static MiddlewareDelegate<TContext> CreateMiddlewareForJsonSerializer<T, TContext>(MiddlewareDelegate<TContext> next, Func<TContext, string> contentSelector, string argumentName) where TContext : Context
         {
             if (contentSelector == null)
             {

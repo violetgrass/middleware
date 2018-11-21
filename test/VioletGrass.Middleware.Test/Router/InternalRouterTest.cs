@@ -10,7 +10,7 @@ namespace VioletGrass.Middleware.Router
         public async Task IMiddlewareBuilder_UseRoute_Empty()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var path = new Tracer();
 
             builder.Use(path.TestMiddleware("A"));
@@ -33,12 +33,12 @@ namespace VioletGrass.Middleware.Router
         public async Task IMiddlewareBuilder_UseRoute_OneBranchMet()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var path = new Tracer();
 
             builder.Use(path.TestMiddleware("A"));
 
-            builder.UseRoutes(new Route(context => true, branchBuilder =>
+            builder.UseRoutes(new Route<Context>(context => true, branchBuilder =>
             {
                 branchBuilder.Use(path.TestMiddleware("C"));
             }
@@ -60,12 +60,12 @@ namespace VioletGrass.Middleware.Router
         public async Task IMiddlewareBuilder_UseRoute_OneBranchMetMultipleMiddleware()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var path = new Tracer();
 
             builder.Use(path.TestMiddleware("A"));
 
-            builder.UseRoutes(new Route(context => true, branchBuilder =>
+            builder.UseRoutes(new Route<Context>(context => true, branchBuilder =>
             {
                 branchBuilder.Use(path.TestMiddleware("C"));
                 branchBuilder.Use(path.TestMiddleware("D"));
@@ -88,12 +88,12 @@ namespace VioletGrass.Middleware.Router
         public async Task IMiddlewareBuilder_UseRoute_OneBranchNotMet()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var path = new Tracer();
 
             builder.Use(path.TestMiddleware("A"));
 
-            builder.UseRoutes(new Route(context => false, branchBuilder =>
+            builder.UseRoutes(new Route<Context>(context => false, branchBuilder =>
             {
                 branchBuilder.Use(path.TestMiddleware("C"));
             }
@@ -115,18 +115,18 @@ namespace VioletGrass.Middleware.Router
         public async Task IMiddlewareBuilder_UseRoute_FirstBranchTaken()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var path = new Tracer();
 
             builder.Use(path.TestMiddleware("A"));
 
             builder.UseRoutes(
-            new Route(context => true, branchBuilder =>
+            new Route<Context>(context => true, branchBuilder =>
                 {
                     branchBuilder.Use(path.TestMiddleware("C"));
                 }
             ),
-            new Route(context => true, branchBuilder =>
+            new Route<Context>(context => true, branchBuilder =>
                 {
                     branchBuilder.Use(path.TestMiddleware("D"));
                 }
@@ -147,18 +147,18 @@ namespace VioletGrass.Middleware.Router
         public async Task IMiddlewareBuilder_UseRoute_FirstBranchSkipped()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var path = new Tracer();
 
             builder.Use(path.TestMiddleware("A"));
 
             builder.UseRoutes(
-            new Route(context => false, branchBuilder =>
+            new Route<Context>(context => false, branchBuilder =>
                 {
                     branchBuilder.Use(path.TestMiddleware("C"));
                 }
             ),
-            new Route(context => true, branchBuilder =>
+            new Route<Context>(context => true, branchBuilder =>
                 {
                     branchBuilder.Use(path.TestMiddleware("D"));
                 }

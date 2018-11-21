@@ -9,7 +9,7 @@ VioletGrass Middleware is a universal middleware pipeline intended to be added t
 Creation of a simple middleware
 
 ````csharp
-var stack = new MiddlewareBuilder()
+var stack = new MiddlewareBuilder<Context>()
     .Use(async (context, next) => {
         Console.Write("Violet"); 
         await next(context); 
@@ -20,6 +20,7 @@ var stack = new MiddlewareBuilder()
     })
     .Build();
 
+// a context can be also other types being derived from Context
 var x = new Context();
 
 // this is just a function
@@ -36,6 +37,8 @@ See the unit tests for it.
 
 - Focused on a overhead free execution pipeline
 - Stay generic (otherwise ASP.NET Core pipelines would be the choice)
+- Use Case 1: Dispatch incoming events to processing functions (e.g. from message queue)
+- Use Case 2: Extension Points in Software
 
 ## License
 

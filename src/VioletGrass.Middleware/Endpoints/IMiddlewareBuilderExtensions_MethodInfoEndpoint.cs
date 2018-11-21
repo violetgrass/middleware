@@ -11,7 +11,7 @@ namespace VioletGrass.Middleware
         //     // route all public methods when a default router is available
         // }
 
-        public static IMiddlewareBuilder UseMethodEndpoint(this IMiddlewareBuilder self, object endpointClass, string methodName)
+        public static IMiddlewareBuilder<TContext> UseMethodEndpoint<TContext>(this IMiddlewareBuilder<TContext> self, object endpointClass, string methodName) where TContext : Context
         {
             if (endpointClass == null)
             {
@@ -23,7 +23,7 @@ namespace VioletGrass.Middleware
                 throw new ArgumentNullException(nameof(methodName));
             }
 
-            return self.Use(MethodInfoEndpoint.CreateMiddlewareFactoryForMethodInfo(endpointClass, methodName));
+            return self.Use(MethodInfoEndpoint.CreateMiddlewareFactoryForMethodInfo<TContext>(endpointClass, methodName));
         }
     }
 }

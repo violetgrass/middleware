@@ -3,11 +3,11 @@ using VioletGrass.Middleware;
 
 namespace VioletGrass.Middleware.Router
 {
-    public struct Route
+    public struct Route<TContext> where TContext : Context
     {
-        public Predicate<Context> IsApplicable { get; }
-        public Action<IMiddlewareBuilder> MiddlewareBuilderForRoute { get; }
-        public Route(Predicate<Context> isApplicable, Action<IMiddlewareBuilder> middlewareBuilderForBranch)
+        public Predicate<TContext> IsApplicable { get; }
+        public Action<IMiddlewareBuilder<TContext>> MiddlewareBuilderForRoute { get; }
+        public Route(Predicate<TContext> isApplicable, Action<IMiddlewareBuilder<TContext>> middlewareBuilderForBranch)
         {
             IsApplicable = isApplicable ?? throw new ArgumentNullException(nameof(isApplicable));
             MiddlewareBuilderForRoute = middlewareBuilderForBranch ?? throw new ArgumentNullException(nameof(middlewareBuilderForBranch));

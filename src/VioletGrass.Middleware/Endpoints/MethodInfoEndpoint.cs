@@ -9,12 +9,12 @@ namespace VioletGrass.Middleware.Endpoints
 {
     internal static class MethodInfoEndpoint
     {
-        public static Func<MiddlewareDelegate, MiddlewareDelegate> CreateMiddlewareFactoryForMethodInfo(object instance, string methodName)
+        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactoryForMethodInfo<TContext>(object instance, string methodName) where TContext : Context
         {
-            return next => CreateMiddleware(instance, methodName); // ignore next ... this is a final middleware
+            return next => CreateMiddleware<TContext>(instance, methodName); // ignore next ... this is a final middleware
         }
 
-        private static MiddlewareDelegate CreateMiddleware(object instance, string methodName)
+        private static MiddlewareDelegate<TContext> CreateMiddleware<TContext>(object instance, string methodName) where TContext : Context
         {
             if (instance == null)
             {

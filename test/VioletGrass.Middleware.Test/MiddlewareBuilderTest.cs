@@ -12,7 +12,7 @@ namespace VioletGrass.Middleware.Test
         public async Task MiddlewareBuilder_Build_Empty()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
 
             // act
             var executeAsync = builder.Build();
@@ -28,7 +28,7 @@ namespace VioletGrass.Middleware.Test
         public async Task MiddlewareBuilder_Build_ForNullContext()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
 
             // act
             builder.Use(next => { return async context => { await next(context); }; });
@@ -45,7 +45,7 @@ namespace VioletGrass.Middleware.Test
         public async Task MiddlewareBuilder_Use_LambdaFactory()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var list = new List<string>();
 
             // act
@@ -65,7 +65,7 @@ namespace VioletGrass.Middleware.Test
         public async Task MiddlewareBuilder_New_DoesNotReuseUseCalls()
         {
             // arrange
-            IMiddlewareBuilder builder = new MiddlewareBuilder();
+            IMiddlewareBuilder<Context> builder = new MiddlewareBuilder<Context>();
             var list = new List<string>();
             builder.Use(next => { return async context => { list.Add("D"); await next(context); }; });
 
@@ -87,7 +87,7 @@ namespace VioletGrass.Middleware.Test
         public async Task MiddlewareBuilder_Use_LinearOrder()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var list = new List<string>();
 
             // act
@@ -114,7 +114,7 @@ namespace VioletGrass.Middleware.Test
         public async Task MiddlewareBuilder_Use_WithEarlyTerminal()
         {
             // arrange
-            var builder = new MiddlewareBuilder();
+            var builder = new MiddlewareBuilder<Context>();
             var list = new List<string>();
 
             // act

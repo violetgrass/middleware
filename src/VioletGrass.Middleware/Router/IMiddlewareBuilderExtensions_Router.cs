@@ -5,7 +5,7 @@ namespace VioletGrass.Middleware
 {
     public static partial class IMiddlewareBuilderExtensions
     {
-        public static IMiddlewareBuilder UseRoutes(this IMiddlewareBuilder self, params Route[] routes)
+        public static IMiddlewareBuilder<TContext> UseRoutes<TContext>(this IMiddlewareBuilder<TContext> self, params Route<TContext>[] routes) where TContext : Context
         {
             if (self == null)
             {
