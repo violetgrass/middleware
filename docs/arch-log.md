@@ -21,7 +21,7 @@ Convenience
 - The core stack will provide `.Use(Func<Context, MiddlewareDelegate, Task> middleware)` extension to write simple middlewares in a lambda or function receiving *context* and *next* as parameters.
 - The core stack will provide a `.Use(IMiddleware middlware)` extension to add a class implementing `IMiddleware`. This is an object oriented interface with its only method `InvokeAsync` receiving *context* and *next* as parameters.
 
-# 2018-10-03 Understanding Middleware Branching (aka Routing)
+## 2018-10-03 Understanding Middleware Branching (aka Routing)
 
 Core
 
@@ -29,7 +29,7 @@ Core
 - A middleware stack needs to branch to dispatch messages to multiple *endpoints*. This process is called *routing*.
 - The central router method is `.UseRoutes(new Route(Predicate<Context> isApplicable, Action<IMiddlewareBuilder> middlewareBuilderForBranch), ...)`. The branches entry condition is defined in the isApplicable predicate and the branch middleware stack is built by the provided builder.
 
-# 2018-10-03 StringRouter Router
+## 2018-10-03 StringRouter Router
 
 - Integration Idea:
   - Use a middleware *stack specific routing key extractor* (e.g. selecting the provided routing key from the message queue system)
@@ -39,3 +39,7 @@ Core
 - Helper Method: `StringRouter.Match(string key, string value)` builds a predicate which checks the *route data* in the context for a match.
 - Extension Method: `IMiddlewareBuilder.UseRoutingKey(Func<Context, string> routingKeySelector)` is used to define the extractor for the routing key
 - Extension Method: `IMiddlewareBuilder.UseRoutingDataExtractor(string[] routingPatterns)` is used to extract the route data. 
+
+## 2020-04-10 Why TContext is constrained to `Context` and not a arbitrary object.
+
+- There are generic purpose/reuse middleware (like the string router) who rely on a way to transport data on the stack. For that purpose a feature collection is utilized. This feature collection is included as `Context.Features` property.

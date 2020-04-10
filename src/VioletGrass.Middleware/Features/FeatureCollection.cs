@@ -1,12 +1,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VioletGrass.Middleware.Features
 {
     public class FeatureCollection : IEnumerable<KeyValuePair<Type, object>>
     {
-        private Dictionary<Type, object> _features = new Dictionary<Type, object>();
+        private Dictionary<Type, object> _features;
+        public FeatureCollection()
+        {
+            _features = new Dictionary<Type, object>();
+        }
+        public FeatureCollection(object[] features)
+        {
+            _features = features.ToDictionary(feature => feature.GetType());
+        }
         public IEnumerator<KeyValuePair<Type, object>> GetEnumerator()
             => _features.GetEnumerator();
 
