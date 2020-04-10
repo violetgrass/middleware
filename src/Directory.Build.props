@@ -1,0 +1,10 @@
+<Project>
+    <PropertyGroup>
+        <PackageProjectUrl>https://github.com/violetgrass/middleware</PackageProjectUrl>
+        <Description>A general purpose middleware</Description>
+        <PackageTags>middleware,pipeline,routing</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryType>Git</RepositoryType>
+        <RepositoryUrl>https://github.com/violetgrass/middleware</RepositoryUrl>
+    </PropertyGroup>
+</Project>
