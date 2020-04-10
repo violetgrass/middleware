@@ -2,7 +2,7 @@
 
 VioletGrass Middleware is a universal middleware pipeline intended to be added to custom adapter solutions (e.g. message queue client library to business logic function).
 
-[![Build Status](https://dev.azure.com/violetgrass/middleware/_apis/build/status/violetgrass.middleware)](https://dev.azure.com/violetgrass/middleware/_build/latest?definitionId=1)
+![build](https://github.com/violetgrass/workitems/middleware/Build-CI/badge.svg)
 ![license:MIT](https://img.shields.io/github/license/violetgrass/middleware?style=flat-square)
 ![Nuget](https://img.shields.io/nuget/v/VioletGrass.Middleware?style=flat-square)
 
