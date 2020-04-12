@@ -41,61 +41,58 @@ namespace VioletGrass.Middleware.Router
             };
         }
 
-        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactoryForRoutingKeyExtractor<TContext>(Func<TContext, string> routingKeySelector) where TContext : Context
+        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactoryForRoutingKeyExtractor<TContext>(Func<TContext, string> routingKeySelector, string[] routePatterns = null) where TContext : Context
         {
             if (routingKeySelector == null)
             {
                 throw new ArgumentNullException(nameof(routingKeySelector));
             }
 
+            Regex[] regexPatterns = Array.Empty<Regex>();
+
+            if (routePatterns != null)
+            {
+                regexPatterns = routePatterns.Select(routePattern => new Regex(routePattern, RegexOptions.Compiled)).ToArray();
+            }
+
             return next =>
             {
                 return async context =>
                 {
-                    var routingKey = routingKeySelector(context);
-
                     var routeData = context.Features.Get<RouteData>() ?? context.Features.Set(new RouteData());
 
-                    routeData.OriginalRoutingKey = routingKey;
+                    ExtractRoutingKey(context, routingKeySelector, routeData);
+
+                    ExtractRouteDataByRegex(regexPatterns, routeData);
 
                     await next(context);
                 };
             };
         }
 
-        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactoryForRouteDataExtractor<TContext>(string[] routePatterns) where TContext : Context
+        private static void ExtractRoutingKey<TContext>(TContext context, Func<TContext, string> routingKeySelector, RouteData routeData) where TContext : Context
         {
-            if (routePatterns == null)
-            {
-                throw new ArgumentNullException(nameof(routePatterns));
-            }
+            var routingKey = routingKeySelector(context);
 
-            return next =>
-            {
-                var regexPatterns = routePatterns.Select(routePattern => new Regex(routePattern, RegexOptions.Compiled)).ToArray();
+            routeData.OriginalRoutingKey = routingKey;
+        }
 
-                return async (TContext context) =>
+        private static void ExtractRouteDataByRegex(Regex[] regexPatterns, RouteData routeData)
+        {
+            foreach (var routePattern in regexPatterns)
+            {
+                var match = routePattern.Match(routeData.OriginalRoutingKey);
+
+                if (match.Success)
                 {
-                    var routeData = context.Features.Get<RouteData>() ?? context.Features.Set(new RouteData());
-
-                    foreach (var routePattern in regexPatterns)
+                    foreach (var groupName in routePattern.GetGroupNames())
                     {
-                        var match = routePattern.Match(routeData.OriginalRoutingKey);
-
-                        if (match.Success)
-                        {
-                            foreach (var groupName in routePattern.GetGroupNames())
-                            {
-                                routeData.Add(groupName, match.Groups[groupName].Value);
-                            }
-
-                            break;
-                        }
+                        routeData.Add(groupName, match.Groups[groupName].Value);
                     }
 
-                    await next(context);
-                };
-            };
+                    break;
+                }
+            }
         }
     }
 }

@@ -65,8 +65,7 @@ namespace VioletGrass.Middleware
             // arrange
             var instance = new TraceableEndpoint();
             var middleware = new MiddlewareBuilder<Context>()
-                .UseRoutingKey(ctx => ctx.Features.Get<Message>().RoutingKey)
-                .UseRoutingDataExtractor("^game-(?<action>.*)$")
+                .UseRoutingKey(context => context.Feature<Message>().RoutingKey, "^game-(?<action>.*)$")
                 .UseRoutes(
                     new Route<Context>(StringRouter.Match("action", "create"), branchBuilder => branchBuilder
                         .UseJsonSerializer<Demo, Context>(ctx => ctx.Features.Get<Message>().Body, "message")

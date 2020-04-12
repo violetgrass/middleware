@@ -35,11 +35,10 @@ namespace VioletGrass.Middleware.Router
             var tracer = new Tracer();
             var middleware = new MiddlewareBuilder<Context>()
                 .Use(tracer.TestMiddleware("A"))
-                .UseRoutingKey(c => c.Features.Get<string>())
-                .UseRoutingDataExtractor(new string[] {
+                .UseRoutingKey(c => c.Features.Get<string>(),
                     "^(?<area>.*)-home-(?<action>.*)$",
                     "^xyz\\.(?<action>.*)$"
-                })
+                )
                 .UseRoutes(
                     new Route<Context>(StringRouter.Match("action", "create"), b => b.Use(tracer.TestMiddleware("B"))),
                     new Route<Context>(StringRouter.Match("action", "delete"), b => b.Use(tracer.TestMiddleware("C")))
