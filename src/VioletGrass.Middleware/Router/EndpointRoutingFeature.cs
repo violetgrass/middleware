@@ -12,7 +12,7 @@ namespace VioletGrass.Middleware.Router
             EndpointRoutes = endpointRoutes ?? throw new System.ArgumentNullException(nameof(endpointRoutes));
         }
 
-        public bool TryEvaluate(TContext context)
+        public bool TryGetEndpoint(TContext context, out Endpoint<TContext> endpoint)
         {
             Endpoint<TContext> firstMatchedEndpoint = null;
             try
@@ -26,11 +26,9 @@ namespace VioletGrass.Middleware.Router
                 firstMatchedEndpoint = null;
             }
 
-            Endpoint = firstMatchedEndpoint;
+            endpoint = firstMatchedEndpoint;
 
             return !(firstMatchedEndpoint is null);
         }
-
-        public Endpoint<TContext> Endpoint { get; private set; } = null;
     }
 }

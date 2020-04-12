@@ -18,7 +18,7 @@ namespace VioletGrass.Middleware.Router
                 .Use(path.TestMiddleware("B"))
                 .Use(async (context, next) =>
                 {
-                    selectedEndpoint = context.Feature<EndpointRoutingFeature<Context>>().Endpoint;
+                    context.Feature<EndpointRoutingFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
 
                     await next(context);
                 })
@@ -47,8 +47,7 @@ namespace VioletGrass.Middleware.Router
                 .Use(path.TestMiddleware("B"))
                 .Use(async (context, next) =>
                 {
-                    context.Feature<EndpointRoutingFeature<Context>>().TryEvaluate(context);
-                    selectedEndpoint = context.Feature<EndpointRoutingFeature<Context>>().Endpoint;
+                    context.Feature<EndpointRoutingFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
 
                     await next(context);
                 })
@@ -86,8 +85,7 @@ namespace VioletGrass.Middleware.Router
                 .Use(path.TestMiddleware("B"))
                 .Use(async (context, next) =>
                 {
-                    context.Feature<EndpointRoutingFeature<Context>>().TryEvaluate(context);
-                    selectedEndpoint = context.Feature<EndpointRoutingFeature<Context>>().Endpoint;
+                    context.Feature<EndpointRoutingFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
 
                     await next(context);
                 })

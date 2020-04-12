@@ -40,9 +40,9 @@ namespace VioletGrass.Middleware.Router
                 {
                     var feature = context.Feature<EndpointRoutingFeature<TContext>>();
 
-                    if (feature.TryEvaluate(context))
+                    if (feature.TryGetEndpoint(context, out var endpoint))
                     {
-                        await feature.Endpoint.DispatcherAsync(context);
+                        await endpoint.DispatcherAsync(context);
                     }
                 };
             };

@@ -1,6 +1,6 @@
 # Universal Middleware Pipeline
 
-VioletGrass Middleware is a universal middleware pipeline intended to be added to custom adapter solutions (e.g. message queue client library to business logic function).
+VioletGrass.Middleware is a universal middleware pipeline intended to be added to custom adapter solutions (e.g. message queue client library to business logic function).
 
 ![build](https://github.com/violetgrass/middleware/workflows/Build-CI/badge.svg)
 ![license:MIT](https://img.shields.io/github/license/violetgrass/middleware?style=flat-square)
@@ -8,7 +8,9 @@ VioletGrass Middleware is a universal middleware pipeline intended to be added t
 
 ## Examples
 
-Creation of a simple stack only middleware
+### Creation of a simple stack only middleware
+
+Used as core foundation, can be utilized for extensions points (it is essentially just a function in the end) or as the base for an extensive dispatching infrastructure.
 
 ````csharp
 var stack = new MiddlewareBuilder<Context>()
@@ -29,7 +31,32 @@ var x = new Context();
 await stack(x); // writes "VioletGrass"
 ````
 
-Predicate based routing (usally behind the scenes)
+### TContext Type Parameter
+
+The purpose of this library is the flexible usage in different scenarios. ASP.NET Core's middleware stack is tightly coupled to the `HttpContext`. As a result it cannot be re-used. `IMiddlewareBuilder<TContext>` and the rest of the library is built with re-use for different context types in mind.
+
+````csharp
+public class QueueMessageContext : Context
+{
+    public Message Message { get; set; }
+    ...
+}
+
+var stack = new MiddlewareBuilder<QueueMessageContext>()
+    .Use(async (context, next) => {
+        Console.Write(context.Message.Body); 
+        await next(context); 
+    })
+    .Build();
+
+var x = new QueueMessageContext(...);
+
+await stack(x);
+````
+
+### Predicate based routing (usally behind the scenes)
+
+Middleware can branch. The basic switching pattern is a predicate utilizing the context. Each branch creates a new middleware.
 
 ````csharp
 var stack = new MiddlewareBuilder<Context>()
@@ -52,20 +79,46 @@ var stack = new MiddlewareBuilder<Context>()
 await stack(new Context("Hello"));
 ````
 
-## 🏃‍♂️ Experimental Endpoint Routing on top of Predicate based Routing
+### 🏃‍♂️ Experimental String Router
+
+***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
+
+While the core engine does support routes, it does on programmatic predicates and not on a string matching. The `StringRouter` adds support for a HTTP Url like matching of routing keys (e.g. from queing systems).
+
+The method `UseRoutingKey` selects a string from the `TContext` to be (optionally) dissected in multiple
+
+````csharp
+var stack = new MiddlewareBuilder<Context>()
+    .UseRoutingKey(c => c.Feature<Message>().RoutingKey, // select a routing key from the context (e.g. a MQ routing key or the HTTP Uri)
+        "^(?<area>.*)-home-(?<action>.*)$", // regex as string extraction methods
+        "^xyz\\.(?<action>.*)$"
+    )
+    .UseRoutes(
+        new Route<Context>(StringRouter.Match("action", "create"), b => b
+            .Use(async (context, next) => { Console.Write($"Create {context.Feature<Message>().Body}"); await next(context); })),
+        new Route<Context>(StringRouter.Match("action", "delete"), b => b
+            .Use(async (context, next) => { Console.Write("Delete Hello"); await next(context); }))
+    )
+    .Build();
+
+await stack(new Context(new Message("xyz.delete", "Hello World")));
+````
+
+See the [unit tests](test\VioletGrass.Middleware.Test\Router\StringRouterTest.cs) for it.
+
+### 🏃‍♂️ Experimental Endpoint Routing
+
+***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
+
+Endpoint Routing enables earliers middlewares to understand the routing and the endpoints of later middlewares configuration. The can access the final endpoint (if the necessary data is present to evaluate the route predicates and additional predicates pushed to the endpoints). Built on top of Predicate based Routing, in example here used with String Router
 
 ````csharp
 var stack = new MiddlewareBuilder<Context>()
     .UseRouting() // enables endpoint routing
-    .Use(async (context, next) => { // has to be extracted ASAP (without route data no branch evaluation can be done)
-        var routeData = context.Feature<RouteData>();
-
-        routeData["action"] = context.Feature<string>(); // simplicity
-
-        context.Feature<EndpointRoutingFeature>().TryEvaluate(context);
-    })
+    .UseRoutingKey(context => context.Feature<string>(), "^(?<action>.*)$") // has to be extracted ASAP (without route data no branch evaluation can be done)
     .Use(async (context, next) => {
-        if (context.Feature<EndpointRoutingFeature>().Endpoint?.Name == "Foo") { // not possible otherwise
+        context.Feature<EndpointRoutingFeature>().TryGetEndpoint(context, out var endpoint); // evaluate branches and determine endpoint
+        if (endpoint?.Name == "Foo") { // not possible otherwise
             Console.WriteLine("[LOG] Before Foo Call");
             await next(context);
             Console.WriteLine("[LOG] After Foo Call");
@@ -74,14 +127,14 @@ var stack = new MiddlewareBuilder<Context>()
         }
     })
     .UseRoutes(
-        new Route<Context>(context => context.Feature<RouteData>()["action"] == "Hello", branchBuilder => branchBuilder
+        new Route<Context>(StringRouter.Match("action", "Hello"), branchBuilder => branchBuilder
             .Use(async (context, next) => { Console.Write("Hello"); await next(context); })
             .Use(async (context, next) => { Console.Write("World"); await next(context); })
             .UseEndpoint(endpointBuilder => {
                 endpointBuilder.MapLambda("Foo", async () => Console.WriteLine("Hello World"));
             })
         ),
-        new Route<Context>(context => context.Feature<RouteData>()["action"] == "Foo", branchBuilder => branchBuilder
+        new Route<Context>(StringRouter.Match("action", "Foo"), branchBuilder => branchBuilder
             .Use(async (context, next) => { Console.Write("I am never called"); await next(context); })
             .UseEndpoint(endpointBuilder => {
                 endpointBuilder.MapLambda("Bar", async (context) => Console.WriteLine("Never World"));
@@ -96,15 +149,7 @@ await stack(new Context("Hello"));
 
 See the [unit tests](test\VioletGrass.Middleware.Test\Router\EndpointRouterTest.cs) for it.
 
-## 🏃‍♂️ Experimental StringRouter
-
-***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
-
-While the core engine does support routes, it does on programmatic predicates and not on a string matching. The `StringRouter` adds support for a HTTP Url like matching of routing keys (e.g. from queing systems).
-
-See the [unit tests](test\VioletGrass.Middleware.Test\Router\StringRouterTest.cs) for it.
-
-## 🏃‍♂️ Experimental MethodInfoEndpoint
+### 🏃‍♂️ Experimental MethodInfoEndpoint
 
 ***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
 
