@@ -43,3 +43,21 @@ Core
 ## 2020-04-10 Why TContext is constrained to `Context` and not a arbitrary object.
 
 - There are generic purpose/reuse middleware (like the string router) who rely on a way to transport data on the stack. For that purpose a feature collection is utilized. This feature collection is included as `Context.Features` property.
+
+## 2020-04-11 Lesson learnt from ASP.NET Core Endpoint Routing
+
+- Lessons Learnt
+  - Early middlewares cannot make decisions based on knowledge gained by later middleware/endpoints (e.g. authorization information annotated to endpoint)
+    - Routing infrastructure must be enabled early
+    - Routes must build a tree of branches available in the routing infrastructure (via class `EndpointBuilder`) done during in concert with the `MiddlewareBuilder`
+    - Endpoints must be registered with the current routing infrastructure on the current tree branch
+    - Routing evaluation (isApplicable tree) must be evaluated as soon as routing data becomes available (reducing the set of endpoints)
+    - Accepted Problem:
+      - Routing data becomes only available over time (e.g. because it is encrypted before)
+
+- Adding Property bag to the MiddlewareBuilder allowing early and later middleware factories to share knowledge during middleware build
+- EndpointBuilder is a registered property allowing the routing middlewares to push route contexts and register endpoints.
+  - EndpointBuilder is a secondary Builder infrastructure, focused on the definition of endpoints (and their routing context)
+  - UseEndpoint is a final middleware dispatching a final invocation (no next) into `Endpoint.DispatcherAsync`. 
+- Create an Endpoint definition which is used to name the endpoint
+- `EndpointRoutingFeature` exposes the selected endpoint (if possible to evaluate at the current state)

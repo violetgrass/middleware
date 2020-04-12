@@ -9,6 +9,8 @@ namespace VioletGrass.Middleware
     {
         private List<Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>>> _factories = new List<Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>>>();
 
+        public IDictionary<string, object> Properties { get; } = new Dictionary<string, object>();
+
         public IMiddlewareBuilder<TContext> Use(Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> middlewareFactory)
         {
             _factories.Add(middlewareFactory);

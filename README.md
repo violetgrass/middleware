@@ -8,7 +8,7 @@ VioletGrass Middleware is a universal middleware pipeline intended to be added t
 
 ## Examples
 
-Creation of a simple middleware
+Creation of a simple stack only middleware
 
 ````csharp
 var stack = new MiddlewareBuilder<Context>()
@@ -29,7 +29,7 @@ var x = new Context();
 await stack(x); // writes "VioletGrass"
 ````
 
-Predicate based routing
+Predicate based routing (usally behind the scenes)
 
 ````csharp
 var stack = new MiddlewareBuilder<Context>()
@@ -48,8 +48,53 @@ var stack = new MiddlewareBuilder<Context>()
     )
     .Build();
 
+// for the sake of simplicity, misusing string as a feature
 await stack(new Context("Hello"));
 ````
+
+## 🏃‍♂️ Experimental Endpoint Routing on top of Predicate based Routing
+
+````csharp
+var stack = new MiddlewareBuilder<Context>()
+    .UseRouting() // enables endpoint routing
+    .Use(async (context, next) => { // has to be extracted ASAP (without route data no branch evaluation can be done)
+        var routeData = context.Feature<RouteData>();
+
+        routeData["action"] = context.Feature<string>(); // simplicity
+
+        context.Feature<EndpointRoutingFeature>().TryEvaluate(context);
+    })
+    .Use(async (context, next) => {
+        if (context.Feature<EndpointRoutingFeature>().Endpoint?.Name == "Foo") { // not possible otherwise
+            Console.WriteLine("[LOG] Before Foo Call");
+            await next(context);
+            Console.WriteLine("[LOG] After Foo Call");
+        } else {
+            await next(context);
+        }
+    })
+    .UseRoutes(
+        new Route<Context>(context => context.Feature<RouteData>()["action"] == "Hello", branchBuilder => branchBuilder
+            .Use(async (context, next) => { Console.Write("Hello"); await next(context); })
+            .Use(async (context, next) => { Console.Write("World"); await next(context); })
+            .UseEndpoint(endpointBuilder => {
+                endpointBuilder.MapLambda("Foo", async () => Console.WriteLine("Hello World"));
+            })
+        ),
+        new Route<Context>(context => context.Feature<RouteData>()["action"] == "Foo", branchBuilder => branchBuilder
+            .Use(async (context, next) => { Console.Write("I am never called"); await next(context); })
+            .UseEndpoint(endpointBuilder => {
+                endpointBuilder.MapLambda("Bar", async (context) => Console.WriteLine("Never World"));
+            })
+        )
+    )
+    .Build();
+
+// for the sake of simplicity, misusing string as a feature
+await stack(new Context("Hello"));
+````
+
+See the [unit tests](test\VioletGrass.Middleware.Test\Router\EndpointRouterTest.cs) for it.
 
 ## 🏃‍♂️ Experimental StringRouter
 

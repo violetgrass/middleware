@@ -1,9 +1,9 @@
 using System;
 using VioletGrass.Middleware;
 
-namespace VioletGrass.Middleware.Router
+namespace VioletGrass.Middleware
 {
-    public struct Route<TContext> where TContext : Context
+    public class Route<TContext> where TContext : Context
     {
         public Predicate<TContext> IsApplicable { get; }
         public Action<IMiddlewareBuilder<TContext>> MiddlewareBuilderForRoute { get; }

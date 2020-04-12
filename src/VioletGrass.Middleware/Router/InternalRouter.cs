@@ -7,11 +7,11 @@ namespace VioletGrass.Middleware.Router
     {
         public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> self, Route<TContext>[] routes) where TContext : Context
         {
+            // as part of the factory for the routing step, built the middleware stacks for each branch
+            var branches = BuildMiddlewareBranches(self, routes);
+
             return next =>
             {
-                // as part of the factory for the routing step, built the middleware stacks for each branch
-                var branches = BuildMiddlewareBranches(self, routes);
-
                 // integrate a middleware which selects the built branches based on their predicate.
                 return CreateMiddleware(next, branches);
             };
@@ -65,11 +65,27 @@ namespace VioletGrass.Middleware.Router
 
             return routes.Select(route =>
             {
+                // setup builder and invoke configuration pipeline
                 var branchBuilder = parentBuilder.New();
+
+                // register route context with relevant features (TODO: abstraction layering)
+                EndpointBuilder<TContext> endpointBuilder = null;
+                if (parentBuilder.Properties.TryGetValue(EndpointBuilder<TContext>.PropertyName, out var endpointDictionaryProperty))
+                {
+                    endpointBuilder = endpointDictionaryProperty as EndpointBuilder<TContext>;
+
+                    branchBuilder.Properties.Add(EndpointBuilder<TContext>.PropertyName, endpointBuilder);
+
+                    endpointBuilder.PushRouteContext(route);
+                }
 
                 route.MiddlewareBuilderForRoute(branchBuilder);
 
+                // build the stack
                 var branchStack = branchBuilder.Build();
+
+                // unregister route context with relevant features
+                endpointBuilder?.PopRouteContext();
 
                 return new MiddlewareBranch<TContext>(route.IsApplicable, branchStack);
             }).ToArray();
