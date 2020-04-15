@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace VioletGrass.Middleware.Router
 {
-    public class EndpointRoutingFeature<TContext> where TContext : Context
+    public class EndpointFeature<TContext> where TContext : Context
     {
-        public IEnumerable<EndpointPredicateRoute<TContext>> EndpointRoutes { get; }
+        public IEnumerable<EndpointPredicate<TContext>> Endpoints { get; }
 
-        public EndpointRoutingFeature(IEnumerable<EndpointPredicateRoute<TContext>> endpointRoutes)
+        public EndpointFeature(IEnumerable<EndpointPredicate<TContext>> endpoints)
         {
-            EndpointRoutes = endpointRoutes ?? throw new System.ArgumentNullException(nameof(endpointRoutes));
+            Endpoints = endpoints ?? throw new System.ArgumentNullException(nameof(endpoints));
         }
 
         public bool TryGetEndpoint(TContext context, out Endpoint<TContext> endpoint)
@@ -17,7 +17,7 @@ namespace VioletGrass.Middleware.Router
             Endpoint<TContext> firstMatchedEndpoint = null;
             try
             {
-                var firstMatchedEndpointPredicateRoute = EndpointRoutes.FirstOrDefault(route => route.Predicates.All(p => p(context)));
+                var firstMatchedEndpointPredicateRoute = Endpoints.FirstOrDefault(route => route.Predicates.All(p => p(context)));
 
                 firstMatchedEndpoint = firstMatchedEndpointPredicateRoute?.Endpoint;
             }

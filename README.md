@@ -61,17 +61,13 @@ Middleware can branch. The basic switching pattern is a predicate utilizing the 
 ````csharp
 var stack = new MiddlewareBuilder<Context>()
     .UseRoutes(
-        new Route<Context>(context => context.Feature<string>() == "Hello", branchBuilder =>
-        {
-            branchBuilder
-                .Use(async (context, next) => { Console.Write("Hello"); await next(context); })
-                .Use(async (context, next) => { Console.Write("World"); await next(context); });
-        }),
-        new Route<Context>(context => true, branchBuilder =>
-        {
-            branchBuilder
-                .Use(async (context, next) => { Console.Write("I am never called"); await next(context); });
-        })
+        new Route<Context>(context => context.Feature<string>() == "Hello", branchBuilder => branchBuilder
+            .Use(async (context, next) => { Console.Write("Hello"); await next(context); })
+            .Use(async (context, next) => { Console.Write("World"); await next(context); })
+        ),
+        new Route<Context>(context => true, branchBuilder => branchBuilder
+            .Use(async (context, next) => { Console.Write("I am never called"); await next(context); })
+        )
     )
     .Build();
 
@@ -117,7 +113,7 @@ var stack = new MiddlewareBuilder<Context>()
     .UseRouting() // enables endpoint routing
     .UseRoutingKey(context => context.Feature<string>(), "^(?<action>.*)$") // has to be extracted ASAP (without route data no branch evaluation can be done)
     .Use(async (context, next) => {
-        context.Feature<EndpointRoutingFeature>().TryGetEndpoint(context, out var endpoint); // evaluate branches and determine endpoint
+        context.Feature<EndpointFeature>().TryGetEndpoint(context, out var endpoint); // evaluate branches and determine endpoint
         if (endpoint?.Name == "Foo") { // not possible otherwise
             Console.WriteLine("[LOG] Before Foo Call");
             await next(context);
@@ -130,14 +126,14 @@ var stack = new MiddlewareBuilder<Context>()
         new Route<Context>(StringRouter.Match("action", "Hello"), branchBuilder => branchBuilder
             .Use(async (context, next) => { Console.Write("Hello"); await next(context); })
             .Use(async (context, next) => { Console.Write("World"); await next(context); })
-            .UseEndpoint(endpointBuilder => {
-                endpointBuilder.MapLambda("Foo", async () => Console.WriteLine("Hello World"));
+            .UseEndpoints(endpoints => {
+                endpoints.MapLambda("Foo", async () => Console.WriteLine("Hello World"));
             })
         ),
         new Route<Context>(StringRouter.Match("action", "Foo"), branchBuilder => branchBuilder
             .Use(async (context, next) => { Console.Write("I am never called"); await next(context); })
-            .UseEndpoint(endpointBuilder => {
-                endpointBuilder.MapLambda("Bar", async (context) => Console.WriteLine("Never World"));
+            .UseEndpoints(endpoints => {
+                endpoints.MapLambda("Bar", async (context) => Console.WriteLine("Never World"));
             })
         )
     )
@@ -149,11 +145,11 @@ await stack(new Context("Hello"));
 
 See the [unit tests](test\VioletGrass.Middleware.Test\Router\EndpointRouterTest.cs) for it.
 
-### 🏃‍♂️ Experimental MethodInfoEndpoint
+### 🏃‍♂️ Experimental ControllerEndpoint
 
 ***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
 
-The MethodInfoEndpoint is a final middleware dispatching a stack endpoint to a regular .NET method.
+The ControllerEndpoint is a endpoint builder extension which allow dispatching a stack against a regular .NET class.
 
 See the [unit tests](test\VioletGrass.Middleware.Test\Endpoints\MethodInfoEndpointTest.cs) for it.
 

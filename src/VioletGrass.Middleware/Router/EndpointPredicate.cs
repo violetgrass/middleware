@@ -2,9 +2,9 @@ using System;
 
 namespace VioletGrass.Middleware.Router
 {
-    public class EndpointPredicateRoute<TContext> where TContext : Context
+    public class EndpointPredicate<TContext> where TContext : Context
     {
-        public EndpointPredicateRoute(Predicate<TContext>[] predicates, Endpoint<TContext> endpoint)
+        public EndpointPredicate(Predicate<TContext>[] predicates, Endpoint<TContext> endpoint)
         {
             Predicates = predicates ?? throw new ArgumentNullException(nameof(predicates));
             Endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));

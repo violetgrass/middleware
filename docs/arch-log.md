@@ -49,15 +49,21 @@ Core
 - Lessons Learnt
   - Early middlewares cannot make decisions based on knowledge gained by later middleware/endpoints (e.g. authorization information annotated to endpoint)
     - Routing infrastructure must be enabled early
-    - Routes must build a tree of branches available in the routing infrastructure (via class `EndpointBuilder`) done during in concert with the `MiddlewareBuilder`
+    - Routes must build a tree of branches available in the routing infrastructure (via class `EndpointRouteBuilder`) done during in concert with the `MiddlewareBuilder`
     - Endpoints must be registered with the current routing infrastructure on the current tree branch
     - Routing evaluation (isApplicable tree) must be evaluated as soon as routing data becomes available (reducing the set of endpoints)
     - Accepted Problem:
       - Routing data becomes only available over time (e.g. because it is encrypted before)
 
 - Adding Property bag to the MiddlewareBuilder allowing early and later middleware factories to share knowledge during middleware build
-- EndpointBuilder is a registered property allowing the routing middlewares to push route contexts and register endpoints.
-  - EndpointBuilder is a secondary Builder infrastructure, focused on the definition of endpoints (and their routing context)
+- EndpointRouteBuilder is a registered property allowing the routing middlewares to push route contexts and register endpoints.
+  - EndpointRouteBuilder is a secondary Builder infrastructure, focused on the definition of endpoints (and their routing context)
   - UseEndpoint is a final middleware dispatching a final invocation (no next) into `Endpoint.DispatcherAsync`. 
 - Create an Endpoint definition which is used to name the endpoint
-- `EndpointRoutingFeature` exposes the selected endpoint (if possible to evaluate at the current state)
+- `EndpointFeature` exposes the selected endpoint (if possible to evaluate at the current state)
+
+## 2020-04-15 Completely switching to endpoint (route) dispatching, removing MethodInfoEndpoint.
+
+- Drop the idea of using a terminal middleware as final execution handling. It is too much boilerplate to handle routes and Endpoint Routing is already more interesting.
+- Establishing of a EndpointBuilder for metadata
+- Establishing of various dispatching delegates.

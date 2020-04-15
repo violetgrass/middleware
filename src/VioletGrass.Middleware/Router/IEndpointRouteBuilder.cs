@@ -2,7 +2,7 @@ using System;
 
 namespace VioletGrass.Middleware
 {
-    public interface IEndpointBuilder<TContext> where TContext : Context
+    public interface IEndpointRouteBuilder<TContext> where TContext : Context
     {
         void PushRouteContext(Route<TContext> isApplicable);
         void PopRouteContext();

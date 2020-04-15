@@ -18,7 +18,7 @@ namespace VioletGrass.Middleware.Router
                 .Use(path.TestMiddleware("B"))
                 .Use(async (context, next) =>
                 {
-                    context.Feature<EndpointRoutingFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
+                    context.Feature<EndpointFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
 
                     await next(context);
                 })
@@ -47,14 +47,14 @@ namespace VioletGrass.Middleware.Router
                 .Use(path.TestMiddleware("B"))
                 .Use(async (context, next) =>
                 {
-                    context.Feature<EndpointRoutingFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
+                    context.Feature<EndpointFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
 
                     await next(context);
                 })
                 .Use(path.TestMiddleware("C"))
-                .UseEndpoint(endpointBuilder =>
+                .UseEndpoints(endpoints =>
                 {
-                    endpointBuilder.MapLambda("", context => { });
+                    endpoints.MapLambda("", context => { });
                 })
                 .Build();
 
@@ -85,7 +85,7 @@ namespace VioletGrass.Middleware.Router
                 .Use(path.TestMiddleware("B"))
                 .Use(async (context, next) =>
                 {
-                    context.Feature<EndpointRoutingFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
+                    context.Feature<EndpointFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
 
                     await next(context);
                 })
@@ -93,17 +93,17 @@ namespace VioletGrass.Middleware.Router
                 .UseRoutes(
                     new Route<Context>(context => routeDPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
                         .Use(path.TestMiddleware("D"))
-                        .UseEndpoint(endpointBuilder => endpointBuilder.MapLambda("D_Endpoint", context => { actualInvokedEndpoint = "D_Endpoint"; }))
+                        .UseEndpoints(endpoints => endpoints.MapLambda("D_Endpoint", context => { actualInvokedEndpoint = "D_Endpoint"; }))
                     ),
                     new Route<Context>(context => routeEPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
                         .UseRoutes(
                             new Route<Context>(context => !routeFPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
                                 .Use(path.TestMiddleware("E"))
-                                .UseEndpoint(endpointBuilder => endpointBuilder.MapLambda("E_Endpoint", context => { actualInvokedEndpoint = "E_Endpoint"; }))
+                                .UseEndpoints(endpoints => endpoints.MapLambda("E_Endpoint", context => { actualInvokedEndpoint = "E_Endpoint"; }))
                             ),
                             new Route<Context>(context => routeFPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
                                 .Use(path.TestMiddleware("F"))
-                                .UseEndpoint(endpointBuilder => endpointBuilder.MapLambda("F_Endpoint", context => { actualInvokedEndpoint = "F_Endpoint"; }))
+                                .UseEndpoints(endpoints => endpoints.MapLambda("F_Endpoint", context => { actualInvokedEndpoint = "F_Endpoint"; }))
                             )
                         )
                     )

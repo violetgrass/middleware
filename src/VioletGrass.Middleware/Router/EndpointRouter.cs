@@ -7,8 +7,8 @@ namespace VioletGrass.Middleware.Router
         public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateRoutingSetupMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> builder) where TContext : Context
         {
             // Setup the IMiddlewareBuilder
-            var endpointBuilder = new EndpointBuilder<TContext>();
-            builder.Properties.Add(EndpointBuilder<TContext>.PropertyName, endpointBuilder);
+            var endpointRouteBuilder = new EndpointRouteBuilder<TContext>();
+            builder.Properties.Add(EndpointRouteBuilder<TContext>.PropertyName, endpointRouteBuilder);
 
             // Setup the factory to create the middleware itself
             return next =>
@@ -20,25 +20,25 @@ namespace VioletGrass.Middleware.Router
             {
                 return async context =>
                 {
-                    context.Features.Set(endpointBuilder.BuildFeature());
+                    context.Features.Set(endpointRouteBuilder.BuildFeature());
 
                     await next(context);
                 };
             }
         }
 
-        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateEndpointMapperMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> self, Action<IEndpointBuilder<TContext>> configure) where TContext : Context
+        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateEndpointMapperMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> self, Action<IEndpointRouteBuilder<TContext>> configure) where TContext : Context
         {
-            var endpointBuilder = self.Properties[EndpointBuilder<TContext>.PropertyName] as EndpointBuilder<TContext>;
-            endpointBuilder.PushMiddlewareBuilder(self);
-            configure(endpointBuilder);
-            endpointBuilder.PopMiddlewareBuilder();
+            var endpointRouteBuilder = self.Properties[EndpointRouteBuilder<TContext>.PropertyName] as EndpointRouteBuilder<TContext>;
+            endpointRouteBuilder.PushMiddlewareBuilder(self);
+            configure(endpointRouteBuilder);
+            endpointRouteBuilder.PopMiddlewareBuilder();
 
             return next => // Terminal Middleware
             {
                 return async context =>
                 {
-                    var feature = context.Feature<EndpointRoutingFeature<TContext>>();
+                    var feature = context.Feature<EndpointFeature<TContext>>();
 
                     if (feature.TryGetEndpoint(context, out var endpoint))
                     {

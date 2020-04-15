@@ -8,7 +8,7 @@ namespace VioletGrass.Middleware
         public static IMiddlewareBuilder<TContext> UseRouting<TContext>(this IMiddlewareBuilder<TContext> self) where TContext : Context
             => self.Use(EndpointRouter.CreateRoutingSetupMiddlewareFactory(self));
 
-        public static IMiddlewareBuilder<TContext> UseEndpoint<TContext>(this IMiddlewareBuilder<TContext> self, Action<IEndpointBuilder<TContext>> endpointBuilder) where TContext : Context
-            => self.Use(EndpointRouter.CreateEndpointMapperMiddlewareFactory(self, endpointBuilder));
+        public static IMiddlewareBuilder<TContext> UseEndpoints<TContext>(this IMiddlewareBuilder<TContext> self, Action<IEndpointRouteBuilder<TContext>> endpoints) where TContext : Context
+            => self.Use(EndpointRouter.CreateEndpointMapperMiddlewareFactory(self, endpoints));
     }
 }

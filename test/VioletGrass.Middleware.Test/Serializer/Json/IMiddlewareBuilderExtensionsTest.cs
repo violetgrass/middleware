@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using VioletGrass.Middleware.Features;
+using VioletGrass.Middleware.Router;
 using Xunit;
 
 namespace VioletGrass.Middleware
@@ -23,13 +24,21 @@ namespace VioletGrass.Middleware
             // arrange
             var instance = new TestEndpoint2();
             var stack = new MiddlewareBuilder<Context>()
+                .UseRouting()
                 .UseJsonSerializer<Demo, Context>(ctx => ctx.Features.Get<string>(), "message")
-                .UseMethodEndpoint(instance, "Foo")
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllerAction(instance, "Foo");
+                })
                 .Build();
 
             // act
             var context = new Context();
             context.Features.Set("{ \"A\": \"a\", \"B\": \"b\" }");
+            var routeData = new RouteData();
+            routeData.Add("action", "Foo");
+            routeData.Add("controller", "");
+            context.Features.Set(routeData);
 
             await stack(context);
 
