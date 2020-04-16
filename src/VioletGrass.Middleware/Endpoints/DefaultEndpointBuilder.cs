@@ -11,10 +11,6 @@ namespace VioletGrass.Middleware
         public string DisplayName { get; set; }
 
         public Endpoint<TContext> Build()
-            => new Endpoint<TContext>()
-            {
-                DisplayName = DisplayName,
-                MiddlewareDelegate = MiddlewareDelegate
-            };
+            => new Endpoint<TContext>(DisplayName, Metadata, MiddlewareDelegate);
     }
 }

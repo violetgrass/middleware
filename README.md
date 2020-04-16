@@ -8,6 +8,8 @@ VioletGrass.Middleware is a universal middleware pipeline intended to be added t
 
 ## Examples
 
+All example should work under namespace `using VioletGrass.Middleware` (after installing NuGet package `VioletGrass.Middleware`)
+
 ### Creation of a simple stack only middleware
 
 Used as core foundation, can be utilized for extensions points (it is essentially just a function in the end) or as the base for an extensive dispatching infrastructure.
@@ -30,6 +32,8 @@ var x = new Context();
 // this is just a function
 await stack(x); // writes "VioletGrass"
 ````
+
+Public APIs: `IMiddlewareBuilder<TContext>`, `MiddlewareBuilder<TContext>`, `MiddlewareDelegate` (build result), `IMiddlewareBuilderExtensions` (`Use` with lambda), `Context` (base class).
 
 ### TContext Type Parameter
 
@@ -54,6 +58,8 @@ var x = new QueueMessageContext(...);
 await stack(x);
 ````
 
+Public APIs: `Context` (base class), `TContext` (type parameters on most of library)
+
 ### Predicate based routing (usally behind the scenes)
 
 Middleware can branch. The basic switching pattern is a predicate utilizing the context. Each branch creates a new middleware.
@@ -74,6 +80,8 @@ var stack = new MiddlewareBuilder<Context>()
 // for the sake of simplicity, misusing string as a feature
 await stack(new Context("Hello"));
 ````
+
+Public APIs: `Route<TContext>`, `IMiddlewareBuilderExtensions` (UseRoutes)
 
 ### 🏃‍♂️ Experimental String Router
 
@@ -99,6 +107,8 @@ var stack = new MiddlewareBuilder<Context>()
 
 await stack(new Context(new Message("xyz.delete", "Hello World")));
 ````
+
+Public APIs: `IMiddlewareBuilderExtensions` (UseRoutingKey), `StringRouter` (for matching), `RouteData` (behind the scenes)
 
 ### 🏃‍♂️ Experimental Endpoint Routing
 
@@ -141,6 +151,8 @@ var stack = new MiddlewareBuilder<Context>()
 await stack(new Context("Hello"));
 ````
 
+Public APIs: `IMiddlewareBuilderExtensions` (UseRouting and UseEndpoints), `IEndpointRouteBuilder`, `IEndpointBuilder<TContext>`, `Endpoint<TContext>` `IEndpointRouteBuilderExtensions` (MapLambda), `EndpointFeature<TContext>` (TryGetEndpoint)
+
 ### 🏃‍♂️ Experimental ControllerEndpoint
 
 ***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
@@ -161,6 +173,8 @@ var stack = new MiddlewareBuilder<Context>()
 
 await stack(new Context(routingKey));
 ````
+
+Public APIs: `IEndpointRouteBuilderExtensions` (MapController and MapControllerAction).
 
 ## Documentation
 

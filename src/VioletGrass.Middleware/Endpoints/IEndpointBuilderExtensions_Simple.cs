@@ -14,5 +14,12 @@ namespace VioletGrass.Middleware
 
             return self;
         }
+
+        public static IEndpointBuilder<TContext> WithMetadata<TContext>(this IEndpointBuilder<TContext> self, object metadata) where TContext : Context
+        {
+            self.Metadata.Add(metadata);
+
+            return self;
+        }
     }
 }
