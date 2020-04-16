@@ -115,7 +115,7 @@ namespace VioletGrass.Middleware.Router
 
             // assert
             // no exception till here
-            Assert.Equal(expectedEndpointName, selectedEndpoint?.Name);
+            Assert.Equal(expectedEndpointName, selectedEndpoint?.DisplayName);
             Assert.Equal(expectedTrace, path.Trace);
             Assert.Equal(expectedEndpointName, actualInvokedEndpoint);
         }

@@ -10,11 +10,6 @@ namespace VioletGrass.Middleware
         void PushPredicateContext(Predicate<TContext> predicate);
         void PopPredicateContext();
 
-        void PushMiddlewareBuilder(IMiddlewareBuilder<TContext> middlewareBuilder);
-        void PopMiddlewareBuilder();
-        IMiddlewareBuilder<TContext> EndpointMiddlewareBuilder { get; }
-
-        void Map(Endpoint<TContext> endpoint);
-        void Map(Endpoint<TContext> endpoint, Predicate<TContext> predicate);
+        void Map(IEndpointBuilder<TContext> endpointBuilder);
     }
 }

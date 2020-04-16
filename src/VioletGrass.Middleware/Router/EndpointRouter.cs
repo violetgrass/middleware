@@ -7,8 +7,8 @@ namespace VioletGrass.Middleware.Router
         public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateRoutingSetupMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> builder) where TContext : Context
         {
             // Setup the IMiddlewareBuilder
-            var endpointRouteBuilder = new EndpointRouteBuilder<TContext>();
-            builder.Properties.Add(EndpointRouteBuilder<TContext>.PropertyName, endpointRouteBuilder);
+            var endpointRouteBuilder = new DefaultEndpointRouteBuilder<TContext>();
+            builder.Properties.Add(DefaultEndpointRouteBuilder<TContext>.PropertyName, endpointRouteBuilder);
 
             // Setup the factory to create the middleware itself
             return next =>
@@ -29,10 +29,8 @@ namespace VioletGrass.Middleware.Router
 
         public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateEndpointMapperMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> self, Action<IEndpointRouteBuilder<TContext>> configure) where TContext : Context
         {
-            var endpointRouteBuilder = self.Properties[EndpointRouteBuilder<TContext>.PropertyName] as EndpointRouteBuilder<TContext>;
-            endpointRouteBuilder.PushMiddlewareBuilder(self);
+            var endpointRouteBuilder = self.Properties[DefaultEndpointRouteBuilder<TContext>.PropertyName] as DefaultEndpointRouteBuilder<TContext>;
             configure(endpointRouteBuilder);
-            endpointRouteBuilder.PopMiddlewareBuilder();
 
             return next => // Terminal Middleware
             {
@@ -42,7 +40,7 @@ namespace VioletGrass.Middleware.Router
 
                     if (feature.TryGetEndpoint(context, out var endpoint))
                     {
-                        await endpoint.DispatcherAsync(context);
+                        await endpoint.MiddlewareDelegate(context);
                     }
                 };
             };

@@ -62,14 +62,11 @@ namespace VioletGrass.Middleware.Endpoints
         private static void MapMethodInfo<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, TController instance, string controllerName, MethodInfo methodInfo) where TContext : Context
         {
             var actionName = methodInfo.Name;
-            var endpoint = new Endpoint<TContext>()
-            {
-                Name = $"{controllerName}.{actionName}",
-                DispatcherAsync = BuildDispatcher<TContext>(instance, methodInfo),
-            };
 
             endpointRouteBuilder.PushPredicateContext(MatchControllerAction(controllerName, actionName));
-            endpointRouteBuilder.Map(endpoint);
+            endpointRouteBuilder.Map()
+                .WithDisplayName($"{controllerName}.{actionName}")
+                .WithMiddlewareDelegate(BuildDispatcher<TContext>(instance, methodInfo));
             endpointRouteBuilder.PopPredicateContext();
         }
 

@@ -4,19 +4,12 @@ using System.Linq;
 
 namespace VioletGrass.Middleware.Router
 {
-    public class EndpointRouteBuilder<TContext> : IEndpointRouteBuilder<TContext> where TContext : Context
+    public class DefaultEndpointRouteBuilder<TContext> : IEndpointRouteBuilder<TContext> where TContext : Context
     {
         private Stack<Predicate<TContext>> _predicateStack = new Stack<Predicate<TContext>>();
-        private Stack<IMiddlewareBuilder<TContext>> _middlewareBuilderStack = new Stack<IMiddlewareBuilder<TContext>>();
         public static string PropertyName = "EndpointRouteBuilder";
 
         public List<EndpointPredicate<TContext>> EndpointRoutes { get; } = new List<EndpointPredicate<TContext>>();
-        public IMiddlewareBuilder<TContext> EndpointMiddlewareBuilder { get => _middlewareBuilderStack.Peek(); }
-
-        public void PushMiddlewareBuilder(IMiddlewareBuilder<TContext> middlewareBuilder)
-            => _middlewareBuilderStack.Push(middlewareBuilder);
-        public void PopMiddlewareBuilder()
-            => _middlewareBuilderStack.Pop();
 
         public void PushRouteContext(Route<TContext> route)
             => PushPredicateContext(route.IsApplicable);
@@ -26,15 +19,9 @@ namespace VioletGrass.Middleware.Router
             _predicateStack.Push(predicate);
         }
 
-        public void Map(Endpoint<TContext> endpoint)
+        public void Map(IEndpointBuilder<TContext> endpointBuilder)
         {
-            EndpointRoutes.Add(new EndpointPredicate<TContext>(_predicateStack.ToArray(), endpoint));
-        }
-        public void Map(Endpoint<TContext> endpoint, Predicate<TContext> predicate)
-        {
-            PushPredicateContext(predicate);
-            Map(endpoint);
-            PopPredicateContext();
+            EndpointRoutes.Add(new EndpointPredicate<TContext>(_predicateStack.ToArray(), endpointBuilder));
         }
 
         public void PopRouteContext()
@@ -47,6 +34,13 @@ namespace VioletGrass.Middleware.Router
 
         public EndpointFeature<TContext> BuildFeature()
         {
+            foreach (var endpointPredicate in EndpointRoutes)
+            {
+                var endpoint = endpointPredicate.EndpointBuilder.Build();
+
+                endpointPredicate.Endpoint = endpoint;
+            }
+
             return new EndpointFeature<TContext>(EndpointRoutes);
 
         }

@@ -4,13 +4,14 @@ namespace VioletGrass.Middleware.Router
 {
     public class EndpointPredicate<TContext> where TContext : Context
     {
-        public EndpointPredicate(Predicate<TContext>[] predicates, Endpoint<TContext> endpoint)
+        public EndpointPredicate(Predicate<TContext>[] predicates, IEndpointBuilder<TContext> endpointBuilder)
         {
             Predicates = predicates ?? throw new ArgumentNullException(nameof(predicates));
-            Endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
+            EndpointBuilder = endpointBuilder ?? throw new ArgumentNullException(nameof(endpointBuilder));
         }
 
         public Predicate<TContext>[] Predicates { get; }
-        public Endpoint<TContext> Endpoint { get; }
+        public IEndpointBuilder<TContext> EndpointBuilder { get; }
+        public Endpoint<TContext> Endpoint { get; set; }
     }
 }
