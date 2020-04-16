@@ -1,6 +1,6 @@
 # Universal Middleware Pipeline
 
-VioletGrass.Middleware is a universal middleware pipeline intended to be added to custom adapter solutions (e.g. message queue client library to business logic function).
+VioletGrass.Middleware is a universal middleware pipeline intended to be added to custom adapter solutions (e.g. message queue client library to business logic function) or extension points within applications.
 
 ![build](https://github.com/violetgrass/middleware/workflows/Build-CI/badge.svg)
 ![license:MIT](https://img.shields.io/github/license/violetgrass/middleware?style=flat-square)
@@ -100,8 +100,6 @@ var stack = new MiddlewareBuilder<Context>()
 await stack(new Context(new Message("xyz.delete", "Hello World")));
 ````
 
-See the [unit tests](test\VioletGrass.Middleware.Test\Router\StringRouterTest.cs) for it.
-
 ### 🏃‍♂️ Experimental Endpoint Routing
 
 ***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
@@ -127,13 +125,13 @@ var stack = new MiddlewareBuilder<Context>()
             .Use(async (context, next) => { Console.Write("Hello"); await next(context); })
             .Use(async (context, next) => { Console.Write("World"); await next(context); })
             .UseEndpoints(endpoints => {
-                endpoints.MapLambda("Foo", async () => Console.WriteLine("Hello World"));
+                endpoints.MapLambda("Foo", async () => Console.WriteLine("Hello World")); // endpoint is constrained by "action = Hello"
             })
         ),
         new Route<Context>(StringRouter.Match("action", "Foo"), branchBuilder => branchBuilder
             .Use(async (context, next) => { Console.Write("I am never called"); await next(context); })
             .UseEndpoints(endpoints => {
-                endpoints.MapLambda("Bar", async (context) => Console.WriteLine("Never World"));
+                endpoints.MapLambda("Bar", async (context) => Console.WriteLine("Never World")); // endpoint is constrained by "action = Foo"
             })
         )
     )
@@ -143,22 +141,26 @@ var stack = new MiddlewareBuilder<Context>()
 await stack(new Context("Hello"));
 ````
 
-See the [unit tests](test\VioletGrass.Middleware.Test\Router\EndpointRouterTest.cs) for it.
-
 ### 🏃‍♂️ Experimental ControllerEndpoint
 
 ***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
 
-The ControllerEndpoint is a endpoint builder extension which allow dispatching a stack against a regular .NET class.
+The ControllerEndpoint is a endpoint builder extension which allow dispatching a stack against a regular .NET class. Explicit middleware branching is not required as the endpoints can internally push predicates (like controller/action names) before mapping an endpoint.
 
-See the [unit tests](test\VioletGrass.Middleware.Test\Endpoints\MethodInfoEndpointTest.cs) for it.
+````csharp
+var controller = new TestController(); // singleton, has multiple endpoints as functions
 
-## Goals
+var stack = new MiddlewareBuilder<Context>()
+    .UseRouting()
+    .UseRoutingKey(c => c.Feature<string>(), @"^(?<controller>.*)/(?<action>.*)$")
+    .UseEndpoints(endpoints =>
+    {
+        endpoints.MapController(controller); // map all public methods as endpoints
+    })
+    .Build();
 
-- Focused on a overhead free execution pipeline
-- Stay generic (otherwise ASP.NET Core pipelines would be the choice)
-- Use Case 1: Dispatch incoming events to processing functions (e.g. from message queue)
-- Use Case 2: Extension Points in Software
+await stack(new Context(routingKey));
+````
 
 ## Documentation
 

@@ -9,7 +9,7 @@ namespace VioletGrass.Middleware
 {
     public class ControllerEndpointTest
     {
-        private class TestEndpoint
+        private class TestController
         {
             private StringBuilder _builder = new StringBuilder();
             public string Trace => _builder.ToString();
@@ -20,13 +20,32 @@ namespace VioletGrass.Middleware
 
                 return Task.CompletedTask;
             }
+
+            public Task Fuba()
+            {
+                _builder.Append(nameof(Fuba));
+
+                return Task.CompletedTask;
+            }
+            public Task Foobar()
+            {
+                _builder.Append(nameof(Foobar));
+
+                return Task.CompletedTask;
+            }
+            public Task Bar()
+            {
+                _builder.Append(nameof(Bar));
+
+                return Task.CompletedTask;
+            }
         }
 
         [Fact]
-        public async Task IEndpointRouteBuilder_UseControllerAction_Simple()
+        public async Task IEndpointRouteBuilder_MapControllerAction_Simple()
         {
             // arrange
-            var instance = new TestEndpoint();
+            var instance = new TestController();
             var stack = new MiddlewareBuilder<Context>()
                 .UseRouting()
                 .UseEndpoints(endpoints =>
@@ -50,7 +69,7 @@ namespace VioletGrass.Middleware
         }
 
         [Fact]
-        public async Task IEndpointRouteBuilder_UseControllerAction_Full()
+        public async Task IEndpointRouteBuilder_MapControllerAction_Full()
         {
             // arrange
             var instance = new TraceableEndpoint();
@@ -74,6 +93,36 @@ namespace VioletGrass.Middleware
             Assert.NotNull(instance.Message);
             Assert.Equal("a", instance.Message.A);
             Assert.Equal("b", instance.Message.B);
+        }
+
+        [Theory]
+        [InlineData("TestController/Fuba", "Fuba")]
+        [InlineData("TestController/Foobar", "Foobar")]
+        [InlineData("TestController/Bar", "Bar")]
+        [InlineData("TestController", "")]
+        [InlineData("TestController/zzz", "")]
+        [InlineData("xyz/Bar", "")]
+        [InlineData("/Bar", "")]
+        [InlineData("", "")]
+        public async Task IEndpointRouteBuilder_MapController_Full(string routingKey, string expected)
+        {
+            // arrange
+            var controller = new TestController();
+
+            var stack = new MiddlewareBuilder<Context>()
+                .UseRouting()
+                .UseRoutingKey(c => c.Feature<string>(), @"^(?<controller>.*)/(?<action>.*)$")
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapController(controller);
+                })
+                .Build();
+
+            // act
+            await stack(new Context(routingKey));
+
+            // assert
+            Assert.Equal(expected, controller.Trace);
         }
     }
 }

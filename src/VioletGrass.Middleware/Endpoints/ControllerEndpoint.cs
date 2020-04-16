@@ -24,13 +24,12 @@ namespace VioletGrass.Middleware.Endpoints
                 throw new ArgumentNullException(nameof(instanceFactory));
             }
 
-            var instance = instanceFactory();
-            var instanceType = instance.GetType();
+            var instanceType = typeof(TController);
             var controllerName = instanceType.Name;
 
             foreach (var methodInfo in instanceType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
             {
-                MapMethodInfo(endpointRouteBuilder, instance, controllerName, methodInfo);
+                MapMethodInfo(endpointRouteBuilder, instanceFactory, controllerName, methodInfo);
             }
         }
 
@@ -51,26 +50,39 @@ namespace VioletGrass.Middleware.Endpoints
                 throw new ArgumentException("method name missing", nameof(methodName));
             }
 
-            var instance = instanceFactory();
-            var instanceType = instance.GetType();
+            var instanceType = typeof(TController);
             var controllerName = string.Empty;
             var methodInfo = instanceType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
 
-            MapMethodInfo(endpointRouteBuilder, instance, controllerName, methodInfo);
+            if (methodInfo is null)
+            {
+                throw new InvalidOperationException("cannot find method in controller");
+            }
+
+            MapMethodInfo(endpointRouteBuilder, instanceFactory, controllerName, methodInfo);
         }
 
-        private static void MapMethodInfo<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, TController instance, string controllerName, MethodInfo methodInfo) where TContext : Context
+        private static void MapMethodInfo<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory, string controllerName, MethodInfo methodInfo) where TContext : Context
         {
+            if (endpointRouteBuilder is null)
+            {
+                throw new ArgumentNullException(nameof(endpointRouteBuilder));
+            }
+            if (methodInfo is null)
+            {
+                throw new ArgumentNullException(nameof(methodInfo));
+            }
+
             var actionName = methodInfo.Name;
 
             endpointRouteBuilder.PushPredicateContext(MatchControllerAction(controllerName, actionName));
             endpointRouteBuilder.Map()
                 .WithDisplayName($"{controllerName}.{actionName}")
-                .WithMiddlewareDelegate(BuildDispatcher<TContext>(instance, methodInfo));
+                .WithMiddlewareDelegate(BuildDispatcher<TContext, TController>(instanceFactory, methodInfo));
             endpointRouteBuilder.PopPredicateContext();
         }
 
-        private static MiddlewareDelegate<TContext> BuildDispatcher<TContext>(object instance, MethodInfo methodInfo) where TContext : Context
+        private static MiddlewareDelegate<TContext> BuildDispatcher<TContext, TController>(Func<TController> instanceFactory, MethodInfo methodInfo) where TContext : Context
         {
             if (methodInfo is null)
             {
@@ -85,6 +97,8 @@ namespace VioletGrass.Middleware.Endpoints
 
                 if (TryBuildParameters(methodInfo, arguments, out var methodInput))
                 {
+                    var instance = instanceFactory();
+
                     var result = methodInfo.Invoke(instance, methodInput) as Task;
 
                     await result;
