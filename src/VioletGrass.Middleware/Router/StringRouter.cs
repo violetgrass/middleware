@@ -72,6 +72,16 @@ namespace VioletGrass.Middleware.Router
 
         private static void ExtractRoutingKey<TContext>(TContext context, Func<TContext, string> routingKeySelector, RouteData routeData) where TContext : Context
         {
+            if (context is null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (routeData is null)
+            {
+                throw new ArgumentNullException(nameof(routeData));
+            }
+
             var routingKey = routingKeySelector(context);
 
             routeData.OriginalRoutingKey = routingKey;
@@ -79,6 +89,16 @@ namespace VioletGrass.Middleware.Router
 
         private static void ExtractRouteDataByRegex(Regex[] regexPatterns, RouteData routeData)
         {
+            if (regexPatterns is null)
+            {
+                throw new ArgumentNullException(nameof(regexPatterns));
+            }
+
+            if (routeData is null)
+            {
+                throw new ArgumentNullException(nameof(routeData));
+            }
+
             foreach (var routePattern in regexPatterns)
             {
                 var match = routePattern.Match(routeData.OriginalRoutingKey);

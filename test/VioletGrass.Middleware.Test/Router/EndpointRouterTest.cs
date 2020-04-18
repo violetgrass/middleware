@@ -34,6 +34,26 @@ namespace VioletGrass.Middleware.Router
             Assert.Equal("ABC", path.Trace);
         }
 
+        [Fact]
+        public async Task IMiddlewareBuilder_UseEndpoints_WithoutUseRouting()
+        {
+            // arrange
+            var path = new Tracer();
+            var stack = new MiddlewareBuilder<Context>()
+                .Use(path.TestMiddleware("A"))
+                .UseEndpoints(endpoints =>
+                {
+
+                })
+                .Build();
+
+            // act
+            await stack(new Context());
+
+            // assert
+            // no exception till here
+        }
+
 
         [Fact]
         public async Task IMiddlewareBuilder_UseRouting_NoBranchingEndpoint()

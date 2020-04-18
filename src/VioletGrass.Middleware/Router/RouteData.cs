@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace VioletGrass.Middleware.Router
+namespace VioletGrass.Middleware
 {
     public class RouteData
     {
