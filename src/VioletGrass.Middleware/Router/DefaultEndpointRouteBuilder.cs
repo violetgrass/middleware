@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace VioletGrass.Middleware.Router
 {
-    public class DefaultEndpointRouteBuilder<TContext> : IEndpointRouteBuilder<TContext> where TContext : Context
+    public class DefaultEndpointRouteBuilder<TContext> : IEndpointRouteBuilder<TContext>, IRouteContextAware<TContext> where TContext : Context
     {
         private Stack<Predicate<TContext>> _predicateStack = new Stack<Predicate<TContext>>();
         public static string PropertyName = "EndpointRouteBuilder";

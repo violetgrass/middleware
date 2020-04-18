@@ -69,14 +69,13 @@ namespace VioletGrass.Middleware.Router
                 var branchBuilder = parentBuilder.New();
 
                 // register route context with relevant features (TODO: abstraction layering)
-                DefaultEndpointRouteBuilder<TContext> endpointRouteBuilder = null;
-                if (parentBuilder.Properties.TryGetValue(DefaultEndpointRouteBuilder<TContext>.PropertyName, out var endpointDictionaryProperty))
+                foreach (var property in parentBuilder.Properties.Where(x => x.Value is IRouteContextAware<TContext>))
                 {
-                    endpointRouteBuilder = endpointDictionaryProperty as DefaultEndpointRouteBuilder<TContext>;
+                    branchBuilder.Properties.Add(property);
 
-                    branchBuilder.Properties.Add(DefaultEndpointRouteBuilder<TContext>.PropertyName, endpointRouteBuilder);
+                    var routeContextAware = property.Value as IRouteContextAware<TContext>;
 
-                    endpointRouteBuilder.PushRouteContext(route);
+                    routeContextAware.PushRouteContext(route);
                 }
 
                 route.MiddlewareBuilderForRoute(branchBuilder);
@@ -85,7 +84,12 @@ namespace VioletGrass.Middleware.Router
                 var branchStack = branchBuilder.Build();
 
                 // unregister route context with relevant features
-                endpointRouteBuilder?.PopRouteContext();
+                foreach (var property in parentBuilder.Properties.Where(x => x.Value is IRouteContextAware<TContext>))
+                {
+                    var routeContextAware = property.Value as IRouteContextAware<TContext>;
+
+                    routeContextAware.PopRouteContext();
+                }
 
                 return new MiddlewareBranch<TContext>(route.IsApplicable, branchStack);
             }).ToArray();
