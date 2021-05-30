@@ -139,5 +139,31 @@ namespace VioletGrass.Middleware.Router
             Assert.Equal(expectedTrace, path.Trace);
             Assert.Equal(expectedEndpointName, actualInvokedEndpoint);
         }
+
+
+        [Fact]
+        public async Task IEndpointRouteBuilder_MapLambda_EndpointBuilderRequires()
+        {
+            // arrange
+            string result = "";
+
+            var stack = new MiddlewareBuilder<Context>()
+                .UseRouting()
+                .UseRoutingKey(c => c.Feature<string>(), @"^(?<xyz>.*)/(?<action>.*)$")
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapLambda("X", _ => result = "X")
+                        .Requires(StringRouter.Match("action", "X"));
+                    endpoints.MapLambda("Y", _ => result = "Y")
+                        .Requires(StringRouter.Match("action", "Y"));
+                })
+                .Build();
+
+            // act
+            await stack(new Context("x/Y"));
+
+            // assert
+            Assert.Equal("Y", result);
+        }
     }
 }

@@ -21,7 +21,10 @@ namespace VioletGrass.Middleware.Router
 
         public void Map(IEndpointBuilder<TContext> endpointBuilder)
         {
-            EndpointRoutes.Add(new EndpointPredicate<TContext>(_predicateStack.ToArray(), endpointBuilder));
+            // persist a copy of the current predicate stack in endpoint builder
+            endpointBuilder.Requires(_predicateStack.ToArray());
+
+            EndpointRoutes.Add(new EndpointPredicate<TContext>(Array.Empty<Predicate<TContext>>(), endpointBuilder));
         }
 
         public void PopRouteContext()
@@ -38,11 +41,12 @@ namespace VioletGrass.Middleware.Router
             {
                 var endpoint = endpointPredicate.EndpointBuilder.Build();
 
+                endpointPredicate.Predicates = endpointPredicate.EndpointBuilder.Predicates.ToArray();
+
                 endpointPredicate.Endpoint = endpoint;
             }
 
             return new EndpointFeature<TContext>(EndpointRoutes);
-
         }
     }
 }

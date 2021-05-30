@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace VioletGrass.Middleware
@@ -9,6 +10,8 @@ namespace VioletGrass.Middleware
         public IList<object> Metadata { get; } = new List<object>();
 
         public string DisplayName { get; set; }
+
+        public IList<Predicate<TContext>> Predicates { get; } = new List<Predicate<TContext>>();
 
         public Endpoint<TContext> Build()
             => new Endpoint<TContext>(DisplayName, Metadata, MiddlewareDelegate);

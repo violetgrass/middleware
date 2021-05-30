@@ -10,7 +10,7 @@ namespace VioletGrass.Middleware.Router
             EndpointBuilder = endpointBuilder ?? throw new ArgumentNullException(nameof(endpointBuilder));
         }
 
-        public Predicate<TContext>[] Predicates { get; }
+        public Predicate<TContext>[] Predicates { get; set; }
         public IEndpointBuilder<TContext> EndpointBuilder { get; }
         public Endpoint<TContext> Endpoint { get; set; }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace VioletGrass.Middleware
@@ -7,6 +8,7 @@ namespace VioletGrass.Middleware
         MiddlewareDelegate<TContext> MiddlewareDelegate { get; set; }
         IList<object> Metadata { get; }
         string DisplayName { get; set; }
+        IList<Predicate<TContext>> Predicates { get; }
 
         Endpoint<TContext> Build();
     }

@@ -167,7 +167,11 @@ var stack = new MiddlewareBuilder<Context>()
     .UseRoutingKey(c => c.Feature<string>(), @"^(?<controller>.*)/(?<action>.*)$")
     .UseEndpoints(endpoints =>
     {
-        endpoints.MapController(controller); // map all public methods as endpoints
+         // map all public methods as endpoints and register them to controller/action route constraints
+        endpoints.MapController(controller);
+
+        // map a lambda and require a match with action route data
+        endpoints.MapLambda("my-lambda", _ => { /* ... */ }).Requires(StringRouter.Match("action", "xyz"));
     })
     .Build();
 
