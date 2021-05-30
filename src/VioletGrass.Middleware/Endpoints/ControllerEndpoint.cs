@@ -33,7 +33,7 @@ namespace VioletGrass.Middleware.Endpoints
             }
         }
 
-        public static void MapAction<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory, string methodName) where TContext : Context
+        public static IEndpointBuilder<TContext> MapAction<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory, string methodName) where TContext : Context
         {
             if (endpointRouteBuilder is null)
             {
@@ -59,10 +59,10 @@ namespace VioletGrass.Middleware.Endpoints
                 throw new InvalidOperationException("cannot find method in controller");
             }
 
-            MapMethodInfo(endpointRouteBuilder, instanceFactory, controllerName, methodInfo);
+            return MapMethodInfo(endpointRouteBuilder, instanceFactory, controllerName, methodInfo);
         }
 
-        private static void MapMethodInfo<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory, string controllerName, MethodInfo methodInfo) where TContext : Context
+        private static IEndpointBuilder<TContext> MapMethodInfo<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory, string controllerName, MethodInfo methodInfo) where TContext : Context
         {
             if (endpointRouteBuilder is null)
             {
@@ -76,10 +76,12 @@ namespace VioletGrass.Middleware.Endpoints
             var actionName = methodInfo.Name;
 
             endpointRouteBuilder.PushPredicateContext(MatchControllerAction(controllerName, actionName));
-            endpointRouteBuilder.Map()
+            var endpointBuilder = endpointRouteBuilder.Map()
                 .WithDisplayName($"{controllerName}.{actionName}")
                 .WithMiddlewareDelegate(BuildDispatcher<TContext, TController>(instanceFactory, methodInfo));
             endpointRouteBuilder.PopPredicateContext();
+
+            return endpointBuilder;
         }
 
         private static MiddlewareDelegate<TContext> BuildDispatcher<TContext, TController>(Func<TController> instanceFactory, MethodInfo methodInfo) where TContext : Context

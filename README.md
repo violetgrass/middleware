@@ -4,7 +4,7 @@ VioletGrass.Middleware is a universal middleware pipeline intended to be added t
 
 ![build](https://github.com/violetgrass/middleware/workflows/Build-CI/badge.svg)
 ![license:MIT](https://img.shields.io/github/license/violetgrass/middleware?style=flat-square)
-![Nuget](https://img.shields.io/nuget/v/VioletGrass.Middleware?style=flat-square)
+[![Nuget](https://img.shields.io/nuget/v/VioletGrass.Middleware?style=flat-square)](https://www.nuget.org/packages/VioletGrass.Middleware/)
 
 ## Examples
 

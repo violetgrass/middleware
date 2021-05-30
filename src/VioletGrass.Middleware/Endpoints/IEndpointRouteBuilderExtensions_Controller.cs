@@ -5,10 +5,10 @@ namespace VioletGrass.Middleware
 {
     public static partial class IEndpointRouteBuilderExtensions
     {
-        public static void MapControllerAction<TContext, TController>(this IEndpointRouteBuilder<TContext> self, TController instance, string methodName) where TContext : Context
+        public static IEndpointBuilder<TContext> MapControllerAction<TContext, TController>(this IEndpointRouteBuilder<TContext> self, TController instance, string methodName) where TContext : Context
             => self.MapControllerAction(() => instance, methodName);
 
-        public static void MapControllerAction<TContext, TController>(this IEndpointRouteBuilder<TContext> self, Func<TController> instanceFactory, string methodName) where TContext : Context
+        public static IEndpointBuilder<TContext> MapControllerAction<TContext, TController>(this IEndpointRouteBuilder<TContext> self, Func<TController> instanceFactory, string methodName) where TContext : Context
             => ControllerEndpoint.MapAction(self, instanceFactory, methodName);
 
         public static void MapController<TContext, TController>(this IEndpointRouteBuilder<TContext> self, TController instance) where TContext : Context
