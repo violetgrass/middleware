@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace VioletGrass.Middleware.Router
@@ -14,17 +15,20 @@ namespace VioletGrass.Middleware.Router
 
             // Setup the endpoint route builder
             var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
+            endpointRouteBuilder.BuildEndpointRoutes();
 
             // return the factory
             return RoutingSetupMiddlewareFactory;
 
             MiddlewareDelegate<TContext> RoutingSetupMiddlewareFactory(MiddlewareDelegate<TContext> next)
             {
+                var endpointRoutes = endpointRouteBuilder.EndpointRoutes;
+
                 return RoutingSetupMiddleware;
 
                 async Task RoutingSetupMiddleware(TContext context)
                 {
-                    AddEndpointFeature(context, endpointRouteBuilder);
+                    AddEndpointFeature(context, endpointRoutes);
 
                     await next(context);
                 }
@@ -45,20 +49,27 @@ namespace VioletGrass.Middleware.Router
 
             var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
             configure(endpointRouteBuilder);
+            endpointRouteBuilder.BuildEndpointRoutes();
 
             return EndpointDispatcherMiddlewareFactory; // Terminal Middleware
 
             MiddlewareDelegate<TContext> EndpointDispatcherMiddlewareFactory(MiddlewareDelegate<TContext> next)
             {
+                var endpointRoutes = endpointRouteBuilder.EndpointRoutes;
+
                 return EndpointDispatcherMiddleware;
 
                 async Task EndpointDispatcherMiddleware(TContext context)
                 {
-                    var feature = EnsureEndpointFeature(context, endpointRouteBuilder);
+                    var feature = EnsureEndpointFeature(context, endpointRoutes);
 
                     if (feature.TryGetEndpoint(context, out var endpoint))
                     {
                         await endpoint.MiddlewareDelegate(context);
+                    }
+                    else
+                    {
+                        await next(context);
                     }
                 }
             }
@@ -81,7 +92,7 @@ namespace VioletGrass.Middleware.Router
             return endpointRouteBuilder as DefaultEndpointRouteBuilder<TContext>;
         }
 
-        private static EndpointFeature<TContext> EnsureEndpointFeature<TContext>(TContext context, DefaultEndpointRouteBuilder<TContext> endpointRouteBuilder) where TContext : Context
+        private static EndpointFeature<TContext> EnsureEndpointFeature<TContext>(TContext context, IEnumerable<EndpointPredicate<TContext>> endpointRoutes) where TContext : Context
         {
             if (context is null)
             {
@@ -92,25 +103,22 @@ namespace VioletGrass.Middleware.Router
 
             if (endpointFeature == null)
             {
-                endpointFeature = AddEndpointFeature(context, endpointRouteBuilder);
+                endpointFeature = AddEndpointFeature(context, endpointRoutes);
             }
 
             return endpointFeature;
         }
 
-        private static EndpointFeature<TContext> AddEndpointFeature<TContext>(TContext context, DefaultEndpointRouteBuilder<TContext> endpointRouteBuilder) where TContext : Context
+        private static EndpointFeature<TContext> AddEndpointFeature<TContext>(TContext context, IEnumerable<EndpointPredicate<TContext>> endpointRoutes) where TContext : Context
         {
             if (context is null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            if (endpointRouteBuilder is null)
-            {
-                throw new ArgumentNullException(nameof(endpointRouteBuilder));
-            }
+            var feature = new EndpointFeature<TContext>(endpointRoutes);
 
-            var endpointFeature = context.Features.Set(endpointRouteBuilder.BuildFeature());
+            var endpointFeature = context.Features.Set(feature);
 
             return endpointFeature;
         }

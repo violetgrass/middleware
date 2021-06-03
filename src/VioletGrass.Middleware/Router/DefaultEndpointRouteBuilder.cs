@@ -9,7 +9,9 @@ namespace VioletGrass.Middleware.Router
         public static string PropertyName = "EndpointRouteBuilder";
         private Stack<Predicate<TContext>> _predicateStack = new Stack<Predicate<TContext>>();
 
-        public List<EndpointPredicate<TContext>> EndpointRoutes { get; } = new List<EndpointPredicate<TContext>>();
+        private List<EndpointPredicate<TContext>> _endpointRoutes { get; } = new List<EndpointPredicate<TContext>>();
+
+        public IEnumerable<EndpointPredicate<TContext>> EndpointRoutes { get; private set; } = null;
 
         public IServiceProvider ServiceProvider { get; }
 
@@ -31,7 +33,7 @@ namespace VioletGrass.Middleware.Router
             // persist a copy of the current predicate stack in endpoint builder
             endpointBuilder.Requires(_predicateStack.ToArray());
 
-            EndpointRoutes.Add(new EndpointPredicate<TContext>(Array.Empty<Predicate<TContext>>(), endpointBuilder));
+            _endpointRoutes.Add(new EndpointPredicate<TContext>(Array.Empty<Predicate<TContext>>(), endpointBuilder));
         }
 
         public void PopRouteContext()
@@ -42,9 +44,9 @@ namespace VioletGrass.Middleware.Router
             _predicateStack.Pop();
         }
 
-        public EndpointFeature<TContext> BuildFeature()
+        public IEnumerable<EndpointPredicate<TContext>> BuildEndpointRoutes()
         {
-            foreach (var endpointPredicate in EndpointRoutes)
+            foreach (var endpointPredicate in _endpointRoutes.Where(er => er.Endpoint is null))
             {
                 var endpoint = endpointPredicate.EndpointBuilder.Build();
 
@@ -53,7 +55,9 @@ namespace VioletGrass.Middleware.Router
                 endpointPredicate.Endpoint = endpoint;
             }
 
-            return new EndpointFeature<TContext>(EndpointRoutes);
+            EndpointRoutes = _endpointRoutes.ToArray(); // copy
+
+            return _endpointRoutes;
         }
     }
 }

@@ -110,9 +110,7 @@ await stack(new Context(new Message("xyz.delete", "Hello World")));
 
 Public APIs: `IMiddlewareBuilderExtensions` (UseRoutingKey), `StringRouter` (for matching), `RouteData` (behind the scenes)
 
-### 🏃‍♂️ Experimental Endpoint Routing
-
-***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
+### Endpoint Routing
 
 Endpoint Routing enables earliers middlewares to understand the routing and the endpoints of later middlewares configuration. The can access the final endpoint (if the necessary data is present to evaluate the route predicates and additional predicates pushed to the endpoints). Built on top of Predicate based Routing, in example here used with String Router
 
