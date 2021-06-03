@@ -83,11 +83,9 @@ await stack(new Context("Hello"));
 
 Public APIs: `Route<TContext>`, `IMiddlewareBuilderExtensions` (UseRoutes)
 
-### 🏃‍♂️ Experimental String Router
+### String Router
 
-***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
-
-While the core engine does support routes, it does on programmatic predicates and not on a string matching. The `StringRouter` adds support for a HTTP Url like matching of routing keys (e.g. from queing systems).
+While the core engine does support routes, it does on programmatic predicates and not on a string matching. The `StringRouter` adds support for routing keys (e.g. from queing systems or the HTTP Uri based on regular expressions).
 
 The method `UseRoutingKey` selects a string from the `TContext` to be (optionally) dissected in multiple
 
@@ -149,6 +147,27 @@ var stack = new MiddlewareBuilder<Context>()
 await stack(new Context("Hello"));
 ````
 
+Each `UseEndpoints` can contain multiple mapped endpoints which can be annotated by additional predicates. `UseEndpoints` which do not having a matching endpoint in it are invoking the next middleware. If they have an applicable endpoint, they execute the endpoint.
+
+````csharp
+var stack = new MiddlewareBuilder<Context>()
+    .UseRouting()
+    .UseRoutingKey(c => c.Feature<string>(), @"^action-(?<action>.*)$")
+    .UseEndpoints(endpoints =>
+    {
+        // map a lambda and require a match with action route data
+        endpoints.MapLambda("my-lambda-a", _ => { /* ... */ })
+            .Requires(StringRouter.Match("action", "A"));
+
+        endpoints.MapLambda("my-lambda-a", _ => { /* ... */ })
+            .Requires(StringRouter.Match("action", "B"));
+    })
+    .Use(c => { /* only invoked if action is different than A or B */ })
+    .Build();
+
+await stack(new Context("action-B"));
+````
+
 Public APIs: `IMiddlewareBuilderExtensions` (UseRouting and UseEndpoints), `IEndpointRouteBuilder`, `IEndpointBuilder<TContext>`, `Endpoint<TContext>` `IEndpointRouteBuilderExtensions` (MapLambda), `EndpointFeature<TContext>` (TryGetEndpoint)
 
 ### 🏃‍♂️ Experimental ControllerEndpoint
@@ -167,9 +186,6 @@ var stack = new MiddlewareBuilder<Context>()
     {
          // map all public methods as endpoints and register them to controller/action route constraints
         endpoints.MapController(controller);
-
-        // map a lambda and require a match with action route data
-        endpoints.MapLambda("my-lambda", _ => { /* ... */ }).Requires(StringRouter.Match("action", "xyz"));
     })
     .Build();
 

@@ -111,17 +111,17 @@ namespace VioletGrass.Middleware.Router
                 })
                 .Use(path.TestMiddleware("C"))
                 .UseRoutes(
-                    new Route<Context>(context => routeDPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
+                    new(context => routeDPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
                         .Use(path.TestMiddleware("D"))
                         .UseEndpoints(endpoints => endpoints.MapLambda("D_Endpoint", context => { actualInvokedEndpoint = "D_Endpoint"; }))
                     ),
-                    new Route<Context>(context => routeEPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
+                    new(context => routeEPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
                         .UseRoutes(
-                            new Route<Context>(context => !routeFPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
+                            new(context => !routeFPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
                                 .Use(path.TestMiddleware("E"))
                                 .UseEndpoints(endpoints => endpoints.MapLambda("E_Endpoint", context => { actualInvokedEndpoint = "E_Endpoint"; }))
                             ),
-                            new Route<Context>(context => routeFPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
+                            new(context => routeFPredicate, branchMiddlewareBuilder => branchMiddlewareBuilder
                                 .Use(path.TestMiddleware("F"))
                                 .UseEndpoints(endpoints => endpoints.MapLambda("F_Endpoint", context => { actualInvokedEndpoint = "F_Endpoint"; }))
                             )
@@ -165,5 +165,60 @@ namespace VioletGrass.Middleware.Router
             // assert
             Assert.Equal("Y", result);
         }
+
+
+        [Theory]
+        [InlineData("A", "ABC", "A_Endpoint")]
+        [InlineData("B", "ABC", "B_Endpoint")]
+        [InlineData("C", "ABCD", "C_Endpoint")]
+        [InlineData("D", "ABCD", "D_Endpoint")]
+        [InlineData("E", "ABCDE", null)]
+        public async Task IMiddlewareBuilder_UseRouting_MultipleEndpointWithoutBranches(string routingKey, string expectedTrace, string expectedEndpointName)
+        {
+            // arrange
+            var path = new Tracer();
+            string actualInvokedEndpoint = null;
+            Endpoint<Context> selectedEndpoint = null;
+            var stack = new MiddlewareBuilder<Context>()
+                .Use(path.TestMiddleware("A"))
+                .UseRouting()
+                .Use(path.TestMiddleware("B"))
+                .Use(async (context, next) =>
+                {
+                    context.Feature<EndpointFeature<Context>>().TryGetEndpoint(context, out selectedEndpoint);
+
+                    await next(context);
+                })
+                .Use(path.TestMiddleware("C"))
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapLambda("A_Endpoint", context => { actualInvokedEndpoint = "A_Endpoint"; })
+                        .Requires(c => c.Feature<string>() == "A");
+
+                    endpoints.MapLambda("B_Endpoint", context => { actualInvokedEndpoint = "B_Endpoint"; })
+                        .Requires(c => c.Feature<string>() == "B");
+                })
+                .Use(path.TestMiddleware("D"))
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapLambda("C_Endpoint", context => { actualInvokedEndpoint = "C_Endpoint"; })
+                        .Requires(c => c.Feature<string>() == "C");
+
+                    endpoints.MapLambda("D_Endpoint", context => { actualInvokedEndpoint = "D_Endpoint"; })
+                        .Requires(c => c.Feature<string>() == "D");
+                })
+                .Use(path.TestMiddleware("E"))
+                .Build();
+
+            // act
+            await stack(new Context(routingKey));
+
+            // assert
+            // no exception till here
+            Assert.Equal(expectedEndpointName, selectedEndpoint?.DisplayName);
+            Assert.Equal(expectedEndpointName, actualInvokedEndpoint);
+            Assert.Equal(expectedTrace, path.Trace);
+        }
+
     }
 }

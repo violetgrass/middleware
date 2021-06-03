@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace VioletGrass.Middleware.Router
 {
-    internal class EndpointRouter
+    internal partial class EndpointRouter
     {
         public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateRoutingSetupMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder) where TContext : Context
         {
@@ -47,8 +47,13 @@ namespace VioletGrass.Middleware.Router
                 throw new ArgumentNullException(nameof(configure));
             }
 
+            var endpointDispatcherId = Guid.NewGuid();
+
             var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
+            // each UseEndpoints only executes the endpoints withing the provided configuration and skip all other endpoints. If queried outside of local configuration, return the element
+            endpointRouteBuilder.PushPredicateContext(context => context.Feature<EndpointDispatcherFeature>()?.DispatcherId is null || context.Feature<EndpointDispatcherFeature>()?.DispatcherId == endpointDispatcherId);
             configure(endpointRouteBuilder);
+            endpointRouteBuilder.PopPredicateContext();
             endpointRouteBuilder.BuildEndpointRoutes();
 
             return EndpointDispatcherMiddlewareFactory; // Terminal Middleware
@@ -63,12 +68,19 @@ namespace VioletGrass.Middleware.Router
                 {
                     var feature = EnsureEndpointFeature(context, endpointRoutes);
 
+                    // select only endpoints in the current configuration
+                    context.Features.Set(new EndpointDispatcherFeature() { DispatcherId = endpointDispatcherId });
+
                     if (feature.TryGetEndpoint(context, out var endpoint))
                     {
+                        context.Features.Set<EndpointDispatcherFeature>(null);
+
                         await endpoint.MiddlewareDelegate(context);
                     }
                     else
                     {
+                        context.Features.Set<EndpointDispatcherFeature>(null);
+
                         await next(context);
                     }
                 }
