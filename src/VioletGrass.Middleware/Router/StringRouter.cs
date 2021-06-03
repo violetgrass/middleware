@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace VioletGrass.Middleware.Router
 {
@@ -41,7 +42,7 @@ namespace VioletGrass.Middleware.Router
             };
         }
 
-        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactoryForRoutingKeyExtractor<TContext>(Func<TContext, string> routingKeySelector, string[] routePatterns = null) where TContext : Context
+        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateRoutingKeyMiddlewareFactory<TContext>(Func<TContext, string> routingKeySelector, string[] routePatterns = null) where TContext : Context
         {
             if (routingKeySelector == null)
             {
@@ -55,9 +56,13 @@ namespace VioletGrass.Middleware.Router
                 regexPatterns = routePatterns.Select(routePattern => new Regex(routePattern, RegexOptions.Compiled)).ToArray();
             }
 
-            return next =>
+            return RoutingKeyMiddlewareFactory;
+
+            MiddlewareDelegate<TContext> RoutingKeyMiddlewareFactory(MiddlewareDelegate<TContext> next)
             {
-                return async context =>
+                return RoutingKeyMiddleware;
+
+                async Task RoutingKeyMiddleware(TContext context)
                 {
                     var routeData = context.Features.Get<RouteData>() ?? context.Features.Set(new RouteData());
 
@@ -66,7 +71,7 @@ namespace VioletGrass.Middleware.Router
                     ExtractRouteDataByRegex(regexPatterns, routeData);
 
                     await next(context);
-                };
+                }
             };
         }
 

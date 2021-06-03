@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace VioletGrass.Middleware.Router
 {
@@ -11,27 +12,26 @@ namespace VioletGrass.Middleware.Router
                 throw new ArgumentNullException(nameof(middlewareBuilder));
             }
 
-            // Setup the IMiddlewareBuilder
+            // Setup the endpoint route builder
             var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
 
-            // Setup the factory to create the middleware itself
-            return next =>
-            {
-                return CreateRoutingSetupMiddleware(next);
-            };
+            // return the factory
+            return RoutingSetupMiddlewareFactory;
 
-            MiddlewareDelegate<TContext> CreateRoutingSetupMiddleware(MiddlewareDelegate<TContext> next)
+            MiddlewareDelegate<TContext> RoutingSetupMiddlewareFactory(MiddlewareDelegate<TContext> next)
             {
-                return async context =>
+                return RoutingSetupMiddleware;
+
+                async Task RoutingSetupMiddleware(TContext context)
                 {
                     AddEndpointFeature(context, endpointRouteBuilder);
 
                     await next(context);
-                };
+                }
             }
         }
 
-        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateEndpointMapperMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder, Action<IEndpointRouteBuilder<TContext>> configure) where TContext : Context
+        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateEndpointDispatcherMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder, Action<IEndpointRouteBuilder<TContext>> configure) where TContext : Context
         {
             if (middlewareBuilder is null)
             {
@@ -46,9 +46,13 @@ namespace VioletGrass.Middleware.Router
             var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
             configure(endpointRouteBuilder);
 
-            return next => // Terminal Middleware
+            return EndpointDispatcherMiddlewareFactory; // Terminal Middleware
+
+            MiddlewareDelegate<TContext> EndpointDispatcherMiddlewareFactory(MiddlewareDelegate<TContext> next)
             {
-                return async context =>
+                return EndpointDispatcherMiddleware;
+
+                async Task EndpointDispatcherMiddleware(TContext context)
                 {
                     var feature = EnsureEndpointFeature(context, endpointRouteBuilder);
 
@@ -56,11 +60,11 @@ namespace VioletGrass.Middleware.Router
                     {
                         await endpoint.MiddlewareDelegate(context);
                     }
-                };
-            };
+                }
+            }
         }
 
-        public static DefaultEndpointRouteBuilder<TContext> EnsureEndpointRouteBuilder<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder) where TContext : Context
+        private static DefaultEndpointRouteBuilder<TContext> EnsureEndpointRouteBuilder<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder) where TContext : Context
         {
             if (middlewareBuilder is null)
             {
@@ -77,7 +81,7 @@ namespace VioletGrass.Middleware.Router
             return endpointRouteBuilder as DefaultEndpointRouteBuilder<TContext>;
         }
 
-        public static EndpointFeature<TContext> EnsureEndpointFeature<TContext>(TContext context, DefaultEndpointRouteBuilder<TContext> endpointRouteBuilder) where TContext : Context
+        private static EndpointFeature<TContext> EnsureEndpointFeature<TContext>(TContext context, DefaultEndpointRouteBuilder<TContext> endpointRouteBuilder) where TContext : Context
         {
             if (context is null)
             {

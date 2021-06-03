@@ -67,3 +67,8 @@ Core
 - Drop the idea of using a terminal middleware as final execution handling. It is too much boilerplate to handle routes and Endpoint Routing is already more interesting.
 - Establishing of a EndpointBuilder for metadata
 - Establishing of various dispatching delegates.
+
+## 2021-06-03 Exposing IEndpointBuilder and allow adding predicates in the endpoint builder
+
+- Addition of IServiceProvider to support extension methods which require services.
+- IEndpointBuilder supports annotation of required predicates (e.g. route annotations directly on endpoints instead of branching of middleware)

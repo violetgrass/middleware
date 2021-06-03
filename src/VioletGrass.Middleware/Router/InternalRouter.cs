@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace VioletGrass.Middleware.Router
 {
@@ -7,14 +8,16 @@ namespace VioletGrass.Middleware.Router
     {
         public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> self, Route<TContext>[] routes) where TContext : Context
         {
-            // as part of the factory for the routing step, built the middleware stacks for each branch
+            // as part of the builder for the routing step, built the middleware stacks for each branch
             var branches = BuildMiddlewareBranches(self, routes);
 
-            return next =>
+            return BranchMiddlewareFactory;
+
+            // integrate a middleware which selects the built branches based on their predicate.
+            MiddlewareDelegate<TContext> BranchMiddlewareFactory(MiddlewareDelegate<TContext> next)
             {
-                // integrate a middleware which selects the built branches based on their predicate.
                 return CreateMiddleware(next, branches);
-            };
+            }
         }
 
         private static MiddlewareDelegate<TContext> CreateMiddleware<TContext>(MiddlewareDelegate<TContext> next, MiddlewareBranch<TContext>[] branches) where TContext : Context
@@ -29,7 +32,9 @@ namespace VioletGrass.Middleware.Router
                 throw new ArgumentNullException(nameof(branches));
             }
 
-            return async context =>
+            return BranchMiddleware;
+
+            async Task BranchMiddleware(TContext context)
             {
                 bool goNext = true;
 
