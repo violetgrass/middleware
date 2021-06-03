@@ -11,6 +11,13 @@ namespace VioletGrass.Middleware
 
         public IDictionary<string, object> Properties { get; } = new Dictionary<string, object>();
 
+        public IServiceProvider ServiceProvider { get; }
+
+        public MiddlewareBuilder(IServiceProvider serviceProvider = default)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
         public IMiddlewareBuilder<TContext> Use(Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> middlewareFactory)
         {
             _factories.Add(middlewareFactory);
@@ -36,6 +43,6 @@ namespace VioletGrass.Middleware
             => Task.CompletedTask;
 
         public IMiddlewareBuilder<TContext> New()
-            => new MiddlewareBuilder<TContext>();
+            => new MiddlewareBuilder<TContext>(ServiceProvider);
     }
 }

@@ -6,10 +6,17 @@ namespace VioletGrass.Middleware.Router
 {
     public class DefaultEndpointRouteBuilder<TContext> : IEndpointRouteBuilder<TContext>, IRouteContextAware<TContext> where TContext : Context
     {
-        private Stack<Predicate<TContext>> _predicateStack = new Stack<Predicate<TContext>>();
         public static string PropertyName = "EndpointRouteBuilder";
+        private Stack<Predicate<TContext>> _predicateStack = new Stack<Predicate<TContext>>();
 
         public List<EndpointPredicate<TContext>> EndpointRoutes { get; } = new List<EndpointPredicate<TContext>>();
+
+        public IServiceProvider ServiceProvider { get; }
+
+        public DefaultEndpointRouteBuilder(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
 
         public void PushRouteContext(Route<TContext> route)
             => PushPredicateContext(route.IsApplicable);

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace VioletGrass.Middleware
 {
@@ -15,6 +16,6 @@ namespace VioletGrass.Middleware
             });
 
         public static IMiddlewareBuilder<TContext> Use<TMiddleware, TContext>(this IMiddlewareBuilder<TContext> self) where TContext : Context where TMiddleware : IMiddleware<TContext>, new()
-            => self.Use(new TMiddleware());
+            => self.Use(self.ServiceProvider is null ? new TMiddleware() : ActivatorUtilities.CreateInstance<TMiddleware>(self.ServiceProvider));
     }
 }

@@ -8,6 +8,7 @@ namespace VioletGrass.Middleware
         MiddlewareDelegate<TContext> MiddlewareDelegate { get; set; }
         IList<object> Metadata { get; }
         string DisplayName { get; set; }
+        IServiceProvider ServiceProvider { get; }
         IList<Predicate<TContext>> Predicates { get; }
 
         Endpoint<TContext> Build();

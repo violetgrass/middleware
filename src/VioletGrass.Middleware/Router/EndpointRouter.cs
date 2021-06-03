@@ -69,7 +69,7 @@ namespace VioletGrass.Middleware.Router
 
             if (!middlewareBuilder.Properties.TryGetValue(DefaultEndpointRouteBuilder<TContext>.PropertyName, out var endpointRouteBuilder))
             {
-                endpointRouteBuilder = new DefaultEndpointRouteBuilder<TContext>();
+                endpointRouteBuilder = new DefaultEndpointRouteBuilder<TContext>(middlewareBuilder.ServiceProvider);
 
                 middlewareBuilder.Properties.Add(DefaultEndpointRouteBuilder<TContext>.PropertyName, endpointRouteBuilder);
             }

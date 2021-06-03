@@ -9,6 +9,8 @@ namespace VioletGrass.Middleware
 
         IDictionary<string, object> Properties { get; }
 
+        IServiceProvider ServiceProvider { get; }
+
         IMiddlewareBuilder<TContext> New();
 
         MiddlewareDelegate<TContext> Build();

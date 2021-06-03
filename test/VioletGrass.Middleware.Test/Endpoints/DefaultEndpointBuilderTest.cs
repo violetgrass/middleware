@@ -9,7 +9,7 @@ namespace VioletGrass.Middleware
         public void DefaultEndpointBuilder_Build_Empty()
         {
             // arange
-            var endpoint = new DefaultEndpointBuilder<Context>()
+            var endpoint = new DefaultEndpointBuilder<Context>(null)
             // act
                 .Build();
 
@@ -23,7 +23,7 @@ namespace VioletGrass.Middleware
         public void DefaultEndpointBuilder_Build_WithDisplayName()
         {
             // arange
-            var endpoint = new DefaultEndpointBuilder<Context>()
+            var endpoint = new DefaultEndpointBuilder<Context>(null)
             // act
                 .WithDisplayName("Foo")
                 .Build();
@@ -40,7 +40,7 @@ namespace VioletGrass.Middleware
             // arange
             MiddlewareDelegate<Context> x = (context) => Task.CompletedTask;
 
-            var endpoint = new DefaultEndpointBuilder<Context>()
+            var endpoint = new DefaultEndpointBuilder<Context>(null)
             // act
                 .WithMiddlewareDelegate(x)
                 .Build();
@@ -56,7 +56,7 @@ namespace VioletGrass.Middleware
         public void DefaultEndpointBuilder_Build_WithMetadata()
         {
             // arange
-            var endpoint = new DefaultEndpointBuilder<Context>()
+            var endpoint = new DefaultEndpointBuilder<Context>(null)
             // act
                 .WithMetadata("Hello World")
                 .Build();
