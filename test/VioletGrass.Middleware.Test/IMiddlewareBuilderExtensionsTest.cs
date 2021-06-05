@@ -86,5 +86,31 @@ namespace VioletGrass.Middleware
                 l => Assert.Equal("OtherContext C bar", l)
             );
         }
+
+        [Fact]
+        public async Task IMiddlewareBuilderExtensions_Run()
+        {
+            // arrange
+            var builder = new MiddlewareBuilder<Context>();
+            var list = new List<string>();
+
+            // act
+            var messageHandler = builder
+                .Use(next => async context => { list.Add("A"); next(context); })
+                .Use(async context => list.Add("B"))
+                .Run(async context => list.Add("C"))
+                .Use(next => async context => { list.Add("D"); next(context); })
+                .Build();
+
+            var x = new OtherContext("bar");
+            await messageHandler(x);
+
+            // assert
+            Assert.Collection(list,
+                l => Assert.Equal("A", l),
+                l => Assert.Equal("B", l),
+                l => Assert.Equal("C", l)
+            );
+        }
     }
 }
