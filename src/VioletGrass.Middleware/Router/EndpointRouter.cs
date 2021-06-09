@@ -56,7 +56,7 @@ namespace VioletGrass.Middleware.Router
             endpointRouteBuilder.PopPredicateContext();
             endpointRouteBuilder.BuildEndpointRoutes();
 
-            return EndpointDispatcherMiddlewareFactory; // Terminal Middleware
+            return EndpointDispatcherMiddlewareFactory;
 
             MiddlewareDelegate<TContext> EndpointDispatcherMiddlewareFactory(MiddlewareDelegate<TContext> next)
             {
@@ -77,6 +77,7 @@ namespace VioletGrass.Middleware.Router
 
                         await endpoint.MiddlewareDelegate(context);
                     }
+                    // if no endpoint is found, continue the middleware stack
                     else
                     {
                         context.Features.Set<EndpointDispatcherFeature>(null);

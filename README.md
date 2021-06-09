@@ -6,6 +6,13 @@ VioletGrass.Middleware is a universal middleware pipeline intended to be added t
 ![license:MIT](https://img.shields.io/github/license/violetgrass/middleware?style=flat-square)
 [![Nuget](https://img.shields.io/nuget/v/VioletGrass.Middleware?style=flat-square)](https://www.nuget.org/packages/VioletGrass.Middleware/)
 
+## Features
+
+- **Extensible Middleware Builder**: A middleware builder building a composite function based on a three staged phase (configuration, building, actual middleware). Extensible by extension methods with access to a IServiceBuilder.
+- **Parameterizable Context Type**: The key capability not offered by the ASP.NET Core Abstractions. The core invocation context is a parameterizable type (e.g. `MessageQueueContext`, `ImageProcessorContext`, ...).
+- **Middleware Branching**: A middleware can be branched and designed for different middleware routes. The route matching is based on predicates (and not URLs) and can be customized for specific need. A simple regular expression based `StringRouter` is included.
+- **Endpoint Routing**: Endpoints can be defined with routing predicates and metadata attached to them, which is accessible througout the middleware stack.
+
 ## Examples
 
 All example should work under namespace `using VioletGrass.Middleware` (after installing NuGet package `VioletGrass.Middleware`)
@@ -110,7 +117,7 @@ Public APIs: `IMiddlewareBuilderExtensions` (UseRoutingKey), `StringRouter` (for
 
 ### Endpoint Routing
 
-Endpoint Routing enables earliers middlewares to understand the routing and the endpoints of later middlewares configuration. The can access the final endpoint (if the necessary data is present to evaluate the route predicates and additional predicates pushed to the endpoints). Built on top of Predicate based Routing, in example here used with String Router
+Endpoint Routing enables earliers middlewares to understand the routing and the endpoints of later middlewares configuration. The can access the final endpoint (if the necessary data is present to evaluate the route predicates and additional predicates pushed to the endpoints). Built on top of Predicate based Routing, in example here used with String Router.
 
 ````csharp
 var stack = new MiddlewareBuilder<Context>()
