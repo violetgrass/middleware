@@ -51,7 +51,7 @@ namespace VioletGrass.Middleware.Router
 
             var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
             // each UseEndpoints only executes the endpoints withing the provided configuration and skip all other endpoints. If queried outside of local configuration, return the element
-            endpointRouteBuilder.PushPredicateContext(context => context.Feature<EndpointDispatcherFeature>()?.DispatcherId is null || context.Feature<EndpointDispatcherFeature>()?.DispatcherId == endpointDispatcherId);
+            endpointRouteBuilder.PushPredicateContext(context => context.Feature<EndpointDispatcherScope>()?.DispatcherId is null || context.Feature<EndpointDispatcherScope>()?.DispatcherId == endpointDispatcherId);
             configure(endpointRouteBuilder);
             endpointRouteBuilder.PopPredicateContext();
             endpointRouteBuilder.BuildEndpointRoutes();
@@ -69,18 +69,18 @@ namespace VioletGrass.Middleware.Router
                     var feature = EnsureEndpointFeature(context, endpointRoutes);
 
                     // select only endpoints in the current configuration
-                    context.Features.Set(new EndpointDispatcherFeature() { DispatcherId = endpointDispatcherId });
+                    context.Features.Set(new EndpointDispatcherScope() { DispatcherId = endpointDispatcherId });
 
                     if (feature.TryGetEndpoint(context, out var endpoint))
                     {
-                        context.Features.Set<EndpointDispatcherFeature>(null);
+                        context.Features.Set<EndpointDispatcherScope>(null);
 
                         await endpoint.MiddlewareDelegate(context);
                     }
                     // if no endpoint is found, continue the middleware stack
                     else
                     {
-                        context.Features.Set<EndpointDispatcherFeature>(null);
+                        context.Features.Set<EndpointDispatcherScope>(null);
 
                         await next(context);
                     }
