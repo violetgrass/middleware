@@ -5,9 +5,9 @@ namespace VioletGrass.Middleware.Router
 {
     public class EndpointFeature<TContext> where TContext : Context
     {
-        public IEnumerable<EndpointPredicate<TContext>> Endpoints { get; }
+        public IEnumerable<EndpointRoute<TContext>> Endpoints { get; }
 
-        public EndpointFeature(IEnumerable<EndpointPredicate<TContext>> endpoints)
+        public EndpointFeature(IEnumerable<EndpointRoute<TContext>> endpoints)
         {
             Endpoints = endpoints ?? throw new System.ArgumentNullException(nameof(endpoints));
         }

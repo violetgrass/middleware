@@ -15,7 +15,7 @@ namespace VioletGrass.Middleware.Router
 
             // Setup the endpoint route builder
             var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
-            endpointRouteBuilder.BuildEndpointRoutes();
+            endpointRouteBuilder.UpdateEndpointRoutes();
 
             // return the factory
             return RoutingSetupMiddlewareFactory;
@@ -54,7 +54,7 @@ namespace VioletGrass.Middleware.Router
             endpointRouteBuilder.PushPredicateContext(context => context.Feature<EndpointDispatcherScope>()?.DispatcherId is null || context.Feature<EndpointDispatcherScope>()?.DispatcherId == endpointDispatcherId);
             configure(endpointRouteBuilder);
             endpointRouteBuilder.PopPredicateContext();
-            endpointRouteBuilder.BuildEndpointRoutes();
+            endpointRouteBuilder.UpdateEndpointRoutes();
 
             return EndpointDispatcherMiddlewareFactory;
 
@@ -105,7 +105,7 @@ namespace VioletGrass.Middleware.Router
             return endpointRouteBuilder as DefaultEndpointRouteBuilder<TContext>;
         }
 
-        private static EndpointFeature<TContext> EnsureEndpointFeature<TContext>(TContext context, IEnumerable<EndpointPredicate<TContext>> endpointRoutes) where TContext : Context
+        private static EndpointFeature<TContext> EnsureEndpointFeature<TContext>(TContext context, IEnumerable<EndpointRoute<TContext>> endpointRoutes) where TContext : Context
         {
             if (context is null)
             {
@@ -122,7 +122,7 @@ namespace VioletGrass.Middleware.Router
             return endpointFeature;
         }
 
-        private static EndpointFeature<TContext> AddEndpointFeature<TContext>(TContext context, IEnumerable<EndpointPredicate<TContext>> endpointRoutes) where TContext : Context
+        private static EndpointFeature<TContext> AddEndpointFeature<TContext>(TContext context, IEnumerable<EndpointRoute<TContext>> endpointRoutes) where TContext : Context
         {
             if (context is null)
             {
