@@ -9,6 +9,6 @@
    <PackageTags>middleware</PackageTags>
    <PackageProjectUrl>https://github.com/violetgrass/middleware</PackageProjectUrl>
    <RepositoryUrl>https://github.com/violetgrass/middleware</RepositoryUrl>
-   <PackageLicenseUrl>https://github.com/violetgrass/middleware/blob/master/LICENSE</PackageLicenseUrl>
+   <PackageLicenseExpression>MIT</PackageLicenseExpression>
  </PropertyGroup>
 </Project>

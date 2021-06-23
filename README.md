@@ -203,7 +203,8 @@ Public APIs: `IEndpointRouteBuilderExtensions` (MapController and MapControllerA
 
 ## Documentation
 
-[Architecture Log](docs/arch-log.md)
+- [Architecture Log](docs/arch-log.md)
+- Inspiraton: [1](https://speakerdeck.com/davidfowl/asp-dot-net-core-architecture-overview)
 
 ## Community, Contributions, License
 
