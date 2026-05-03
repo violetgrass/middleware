@@ -1,9 +1,8 @@
 using System;
 
-namespace VioletGrass.Middleware.Router
+namespace VioletGrass.Middleware.Router;
+
+internal class EndpointDispatcherScope
 {
-    internal class EndpointDispatcherScope
-    {
-        public Guid? DispatcherId { get; set; } = null;
-    }
+    public Guid? DispatcherId { get; set; } = null;
 }

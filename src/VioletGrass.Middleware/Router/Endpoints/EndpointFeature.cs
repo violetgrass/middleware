@@ -1,34 +1,33 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace VioletGrass.Middleware.Router
+namespace VioletGrass.Middleware.Router;
+
+public class EndpointFeature<TContext> where TContext : Context
 {
-    public class EndpointFeature<TContext> where TContext : Context
+    public IEnumerable<EndpointRoute<TContext>> Endpoints { get; }
+
+    public EndpointFeature(IEnumerable<EndpointRoute<TContext>> endpoints)
     {
-        public IEnumerable<EndpointRoute<TContext>> Endpoints { get; }
+        Endpoints = endpoints ?? throw new System.ArgumentNullException(nameof(endpoints));
+    }
 
-        public EndpointFeature(IEnumerable<EndpointRoute<TContext>> endpoints)
+    public bool TryGetEndpoint(TContext context, out Endpoint<TContext> endpoint)
+    {
+        Endpoint<TContext> firstMatchedEndpoint = null;
+        try
         {
-            Endpoints = endpoints ?? throw new System.ArgumentNullException(nameof(endpoints));
+            var firstMatchedEndpointPredicateRoute = Endpoints.FirstOrDefault(route => route.Predicates.All(p => p(context)));
+
+            firstMatchedEndpoint = firstMatchedEndpointPredicateRoute?.Endpoint;
+        }
+        catch
+        {
+            firstMatchedEndpoint = null;
         }
 
-        public bool TryGetEndpoint(TContext context, out Endpoint<TContext> endpoint)
-        {
-            Endpoint<TContext> firstMatchedEndpoint = null;
-            try
-            {
-                var firstMatchedEndpointPredicateRoute = Endpoints.FirstOrDefault(route => route.Predicates.All(p => p(context)));
+        endpoint = firstMatchedEndpoint;
 
-                firstMatchedEndpoint = firstMatchedEndpointPredicateRoute?.Endpoint;
-            }
-            catch
-            {
-                firstMatchedEndpoint = null;
-            }
-
-            endpoint = firstMatchedEndpoint;
-
-            return !(firstMatchedEndpoint is null);
-        }
+        return !(firstMatchedEndpoint is null);
     }
 }

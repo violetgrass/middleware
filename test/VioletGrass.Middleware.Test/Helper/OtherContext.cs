@@ -1,12 +1,11 @@
-namespace VioletGrass.Middleware
-{
-    public class OtherContext : Context
-    {
-        public OtherContext(string foo)
-        {
-            Foo = foo;
-        }
+namespace VioletGrass.Middleware;
 
-        public string Foo { get; }
+public class OtherContext : Context
+{
+    public OtherContext(string foo)
+    {
+        Foo = foo;
     }
+
+    public string Foo { get; }
 }

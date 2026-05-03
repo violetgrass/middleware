@@ -1,179 +1,178 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Xunit;
 
-namespace VioletGrass.Middleware.Router
+namespace VioletGrass.Middleware.Router;
+
+public class InternalRouterTest
 {
-    public class InternalRouterTest
+    [Fact]
+    public async Task IMiddlewareBuilder_UseRoute_Empty()
     {
-        [Fact]
-        public async Task IMiddlewareBuilder_UseRoute_Empty()
+        // arrange
+        var builder = new MiddlewareBuilder<Context>();
+        var path = new Tracer();
+
+        builder.Use(path.TestMiddleware("A"));
+
+        builder.UseRoutes();
+
+        builder.Use(path.TestMiddleware("B"));
+
+        var stack = builder.Build();
+
+        // act
+        await stack(new Context());
+
+        // assert
+        // no exception till here
+        Assert.Equal("AB", path.Trace);
+    }
+
+    [Fact]
+    public async Task IMiddlewareBuilder_UseRoute_OneBranchMet()
+    {
+        // arrange
+        var builder = new MiddlewareBuilder<Context>();
+        var path = new Tracer();
+
+        builder.Use(path.TestMiddleware("A"));
+
+        builder.UseRoutes(new Route<Context>(context => true, branchBuilder =>
         {
-            // arrange
-            var builder = new MiddlewareBuilder<Context>();
-            var path = new Tracer();
-
-            builder.Use(path.TestMiddleware("A"));
-
-            builder.UseRoutes();
-
-            builder.Use(path.TestMiddleware("B"));
-
-            var stack = builder.Build();
-
-            // act
-            await stack(new Context());
-
-            // assert
-            // no exception till here
-            Assert.Equal("AB", path.Trace);
+            branchBuilder.Use(path.TestMiddleware("C"));
         }
+        ));
 
-        [Fact]
-        public async Task IMiddlewareBuilder_UseRoute_OneBranchMet()
+        builder.Use(path.TestMiddleware("B"));
+
+        var stack = builder.Build();
+
+        // act
+        await stack(new Context());
+
+        // assert
+        // no exception till here
+        Assert.Equal("AC", path.Trace);
+    }
+
+    [Fact]
+    public async Task IMiddlewareBuilder_UseRoute_OneBranchMetMultipleMiddleware()
+    {
+        // arrange
+        var builder = new MiddlewareBuilder<Context>();
+        var path = new Tracer();
+
+        builder.Use(path.TestMiddleware("A"));
+
+        builder.UseRoutes(new Route<Context>(context => true, branchBuilder =>
         {
-            // arrange
-            var builder = new MiddlewareBuilder<Context>();
-            var path = new Tracer();
+            branchBuilder.Use(path.TestMiddleware("C"));
+            branchBuilder.Use(path.TestMiddleware("D"));
+        }
+        ));
 
-            builder.Use(path.TestMiddleware("A"));
+        builder.Use(path.TestMiddleware("B"));
 
-            builder.UseRoutes(new Route<Context>(context => true, branchBuilder =>
+        var stack = builder.Build();
+
+        // act
+        await stack(new Context());
+
+        // assert
+        // no exception till here
+        Assert.Equal("ACD", path.Trace);
+    }
+
+    [Fact]
+    public async Task IMiddlewareBuilder_UseRoute_OneBranchNotMet()
+    {
+        // arrange
+        var builder = new MiddlewareBuilder<Context>();
+        var path = new Tracer();
+
+        builder.Use(path.TestMiddleware("A"));
+
+        builder.UseRoutes(new Route<Context>(context => false, branchBuilder =>
+        {
+            branchBuilder.Use(path.TestMiddleware("C"));
+        }
+        ));
+
+        builder.Use(path.TestMiddleware("B"));
+
+        var stack = builder.Build();
+
+        // act
+        await stack(new Context());
+
+        // assert
+        // no exception till here
+        Assert.Equal("AB", path.Trace);
+    }
+
+    [Fact]
+    public async Task IMiddlewareBuilder_UseRoute_FirstBranchTaken()
+    {
+        // arrange
+        var builder = new MiddlewareBuilder<Context>();
+        var path = new Tracer();
+
+        builder.Use(path.TestMiddleware("A"));
+
+        builder.UseRoutes(
+        new Route<Context>(context => true, branchBuilder =>
             {
                 branchBuilder.Use(path.TestMiddleware("C"));
             }
-            ));
-
-            builder.Use(path.TestMiddleware("B"));
-
-            var stack = builder.Build();
-
-            // act
-            await stack(new Context());
-
-            // assert
-            // no exception till here
-            Assert.Equal("AC", path.Trace);
-        }
-
-        [Fact]
-        public async Task IMiddlewareBuilder_UseRoute_OneBranchMetMultipleMiddleware()
-        {
-            // arrange
-            var builder = new MiddlewareBuilder<Context>();
-            var path = new Tracer();
-
-            builder.Use(path.TestMiddleware("A"));
-
-            builder.UseRoutes(new Route<Context>(context => true, branchBuilder =>
+        ),
+        new Route<Context>(context => true, branchBuilder =>
             {
-                branchBuilder.Use(path.TestMiddleware("C"));
                 branchBuilder.Use(path.TestMiddleware("D"));
             }
-            ));
+        ));
 
-            builder.Use(path.TestMiddleware("B"));
+        builder.Use(path.TestMiddleware("B"));
 
-            var stack = builder.Build();
+        var stack = builder.Build();
 
-            // act
-            await stack(new Context());
+        // act
+        await stack(new Context());
 
-            // assert
-            // no exception till here
-            Assert.Equal("ACD", path.Trace);
-        }
+        // assert
+        // no exception till here
+        Assert.Equal("AC", path.Trace);
+    }
+    [Fact]
+    public async Task IMiddlewareBuilder_UseRoute_FirstBranchSkipped()
+    {
+        // arrange
+        var builder = new MiddlewareBuilder<Context>();
+        var path = new Tracer();
 
-        [Fact]
-        public async Task IMiddlewareBuilder_UseRoute_OneBranchNotMet()
-        {
-            // arrange
-            var builder = new MiddlewareBuilder<Context>();
-            var path = new Tracer();
+        builder.Use(path.TestMiddleware("A"));
 
-            builder.Use(path.TestMiddleware("A"));
-
-            builder.UseRoutes(new Route<Context>(context => false, branchBuilder =>
+        builder.UseRoutes(
+        new Route<Context>(context => false, branchBuilder =>
             {
                 branchBuilder.Use(path.TestMiddleware("C"));
             }
-            ));
+        ),
+        new Route<Context>(context => true, branchBuilder =>
+            {
+                branchBuilder.Use(path.TestMiddleware("D"));
+            }
+        ));
 
-            builder.Use(path.TestMiddleware("B"));
+        builder.Use(path.TestMiddleware("B"));
 
-            var stack = builder.Build();
+        var stack = builder.Build();
 
-            // act
-            await stack(new Context());
+        // act
+        await stack(new Context());
 
-            // assert
-            // no exception till here
-            Assert.Equal("AB", path.Trace);
-        }
-
-        [Fact]
-        public async Task IMiddlewareBuilder_UseRoute_FirstBranchTaken()
-        {
-            // arrange
-            var builder = new MiddlewareBuilder<Context>();
-            var path = new Tracer();
-
-            builder.Use(path.TestMiddleware("A"));
-
-            builder.UseRoutes(
-            new Route<Context>(context => true, branchBuilder =>
-                {
-                    branchBuilder.Use(path.TestMiddleware("C"));
-                }
-            ),
-            new Route<Context>(context => true, branchBuilder =>
-                {
-                    branchBuilder.Use(path.TestMiddleware("D"));
-                }
-            ));
-
-            builder.Use(path.TestMiddleware("B"));
-
-            var stack = builder.Build();
-
-            // act
-            await stack(new Context());
-
-            // assert
-            // no exception till here
-            Assert.Equal("AC", path.Trace);
-        }
-        [Fact]
-        public async Task IMiddlewareBuilder_UseRoute_FirstBranchSkipped()
-        {
-            // arrange
-            var builder = new MiddlewareBuilder<Context>();
-            var path = new Tracer();
-
-            builder.Use(path.TestMiddleware("A"));
-
-            builder.UseRoutes(
-            new Route<Context>(context => false, branchBuilder =>
-                {
-                    branchBuilder.Use(path.TestMiddleware("C"));
-                }
-            ),
-            new Route<Context>(context => true, branchBuilder =>
-                {
-                    branchBuilder.Use(path.TestMiddleware("D"));
-                }
-            ));
-
-            builder.Use(path.TestMiddleware("B"));
-
-            var stack = builder.Build();
-
-            // act
-            await stack(new Context());
-
-            // assert
-            // no exception till here
-            Assert.Equal("AD", path.Trace);
-        }
+        // assert
+        // no exception till here
+        Assert.Equal("AD", path.Trace);
     }
 }

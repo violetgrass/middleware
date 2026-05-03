@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
 
-namespace VioletGrass.Middleware
+namespace VioletGrass.Middleware;
+
+public interface IMiddlewareBuilder<TContext> where TContext : Context
 {
-    public interface IMiddlewareBuilder<TContext> where TContext : Context
-    {
-        IMiddlewareBuilder<TContext> Use(Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> middlewareBuilder);
+    IMiddlewareBuilder<TContext> Use(Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> middlewareBuilder);
 
-        IDictionary<string, object> Properties { get; }
+    IDictionary<string, object> Properties { get; }
 
-        IServiceProvider ServiceProvider { get; }
+    IServiceProvider ServiceProvider { get; }
 
-        IMiddlewareBuilder<TContext> New();
+    IMiddlewareBuilder<TContext> New();
 
-        MiddlewareDelegate<TContext> Build();
-    }
+    MiddlewareDelegate<TContext> Build();
 }

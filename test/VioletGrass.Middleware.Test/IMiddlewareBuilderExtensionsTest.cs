@@ -1,116 +1,115 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Xunit;
 
-namespace VioletGrass.Middleware
+namespace VioletGrass.Middleware;
+
+public class TestMiddleware<TContext> : IMiddleware<TContext> where TContext : Context
 {
-    public class TestMiddleware<TContext> : IMiddleware<TContext> where TContext : Context
+    private readonly List<string> _list;
+
+    public TestMiddleware(List<string> list)
     {
-        private readonly List<string> _list;
-
-        public TestMiddleware(List<string> list)
-        {
-            this._list = list;
-        }
-
-        public Task InvokeAsync(TContext context, MiddlewareDelegate<TContext> next)
-        {
-            _list.Add(nameof(TestMiddleware<TContext>));
-
-            return next(context);
-        }
+        this._list = list;
     }
-    public partial class IMiddlewareBuilderExtensionsTest
+
+    public Task InvokeAsync(TContext context, MiddlewareDelegate<TContext> next)
     {
-        [Fact]
-        public async Task IMiddlewareBuilderExtensions_Use_Lambda()
-        {
-            // arrange
-            var builder = new MiddlewareBuilder<Context>();
-            var list = new List<string>();
+        _list.Add(nameof(TestMiddleware<TContext>));
 
-            // act
-            builder.Use(async (context, next) => { list.Add("C"); await next(context); });
+        return next(context);
+    }
+}
+public partial class IMiddlewareBuilderExtensionsTest
+{
+    [Fact]
+    public async Task IMiddlewareBuilderExtensions_Use_Lambda()
+    {
+        // arrange
+        var builder = new MiddlewareBuilder<Context>();
+        var list = new List<string>();
 
-            var executeAsync = builder.Build();
-            var x = new Context();
-            await executeAsync(x);
+        // act
+        builder.Use(async (context, next) => { list.Add("C"); await next(context); });
 
-            // assert
-            Assert.Collection(list,
-                l => Assert.Equal("C", l)
-            );
-        }
+        var executeAsync = builder.Build();
+        var x = new Context();
+        await executeAsync(x);
 
-        [Fact]
-        public async Task IMiddlewareBuilderExtensions_Use_IMiddleware()
-        {
-            // arrange
-            var builder = new MiddlewareBuilder<Context>();
-            var list = new List<string>();
+        // assert
+        Assert.Collection(list,
+            l => Assert.Equal("C", l)
+        );
+    }
 
-            // act
-            builder.Use(new TestMiddleware<Context>(list));
+    [Fact]
+    public async Task IMiddlewareBuilderExtensions_Use_IMiddleware()
+    {
+        // arrange
+        var builder = new MiddlewareBuilder<Context>();
+        var list = new List<string>();
 
-            var executeAsync = builder.Build();
-            var x = new Context();
-            await executeAsync(x);
+        // act
+        builder.Use(new TestMiddleware<Context>(list));
 
-            // assert
-            Assert.Collection(list,
-                l => Assert.Equal("TestMiddleware", l)
-            );
-        }
+        var executeAsync = builder.Build();
+        var x = new Context();
+        await executeAsync(x);
 
-        [Fact]
-        public async Task IMiddlewareBuilderExtensions_Use_OtherContext()
-        {
-            // arrange
-            var builder = new MiddlewareBuilder<OtherContext>();
-            var list = new List<string>();
+        // assert
+        Assert.Collection(list,
+            l => Assert.Equal("TestMiddleware", l)
+        );
+    }
 
-            // act
-            builder.Use(next => { return async context => { list.Add(context.GetType().Name + " B " + context.Foo); await next(context); }; });
-            builder.Use(new TestMiddleware<OtherContext>(list));
-            builder.Use(async (context, next) => { list.Add(context.GetType().Name + " C " + context.Foo); await next(context); });
+    [Fact]
+    public async Task IMiddlewareBuilderExtensions_Use_OtherContext()
+    {
+        // arrange
+        var builder = new MiddlewareBuilder<OtherContext>();
+        var list = new List<string>();
 
-            var executeAsync = builder.Build();
-            var x = new OtherContext("bar");
-            await executeAsync(x);
+        // act
+        builder.Use(next => { return async context => { list.Add(context.GetType().Name + " B " + context.Foo); await next(context); }; });
+        builder.Use(new TestMiddleware<OtherContext>(list));
+        builder.Use(async (context, next) => { list.Add(context.GetType().Name + " C " + context.Foo); await next(context); });
 
-            // assert
-            Assert.Collection(list,
-                l => Assert.Equal("OtherContext B bar", l),
-                l => Assert.Equal("TestMiddleware", l),
-                l => Assert.Equal("OtherContext C bar", l)
-            );
-        }
+        var executeAsync = builder.Build();
+        var x = new OtherContext("bar");
+        await executeAsync(x);
 
-        [Fact]
-        public async Task IMiddlewareBuilderExtensions_Run()
-        {
-            // arrange
-            var builder = new MiddlewareBuilder<Context>();
-            var list = new List<string>();
+        // assert
+        Assert.Collection(list,
+            l => Assert.Equal("OtherContext B bar", l),
+            l => Assert.Equal("TestMiddleware", l),
+            l => Assert.Equal("OtherContext C bar", l)
+        );
+    }
 
-            // act
-            var messageHandler = builder
-                .Use(next => async context => { list.Add("A"); next(context); })
-                .Use(async context => list.Add("B"))
-                .Run(async context => list.Add("C"))
-                .Use(next => async context => { list.Add("D"); next(context); })
-                .Build();
+    [Fact]
+    public async Task IMiddlewareBuilderExtensions_Run()
+    {
+        // arrange
+        var builder = new MiddlewareBuilder<Context>();
+        var list = new List<string>();
 
-            var x = new OtherContext("bar");
-            await messageHandler(x);
+        // act
+        var messageHandler = builder
+            .Use(next => async context => { list.Add("A"); next(context); })
+            .Use(async context => list.Add("B"))
+            .Run(async context => list.Add("C"))
+            .Use(next => async context => { list.Add("D"); next(context); })
+            .Build();
 
-            // assert
-            Assert.Collection(list,
-                l => Assert.Equal("A", l),
-                l => Assert.Equal("B", l),
-                l => Assert.Equal("C", l)
-            );
-        }
+        var x = new OtherContext("bar");
+        await messageHandler(x);
+
+        // assert
+        Assert.Collection(list,
+            l => Assert.Equal("A", l),
+            l => Assert.Equal("B", l),
+            l => Assert.Equal("C", l)
+        );
     }
 }

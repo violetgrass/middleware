@@ -1,14 +1,13 @@
 using System;
 
-namespace VioletGrass.Middleware
+namespace VioletGrass.Middleware;
+
+public interface IEndpointRouteBuilder<TContext> where TContext : Context
 {
-    public interface IEndpointRouteBuilder<TContext> where TContext : Context
-    {
-        IServiceProvider ServiceProvider { get; }
+    IServiceProvider ServiceProvider { get; }
 
-        void PushPredicateContext(Predicate<TContext> predicate);
-        void PopPredicateContext();
+    void PushPredicateContext(Predicate<TContext> predicate);
+    void PopPredicateContext();
 
-        void Map(IEndpointBuilder<TContext> endpointBuilder);
-    }
+    void Map(IEndpointBuilder<TContext> endpointBuilder);
 }

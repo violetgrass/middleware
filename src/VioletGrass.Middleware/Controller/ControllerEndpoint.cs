@@ -2,165 +2,165 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+
 using VioletGrass.Middleware.Features;
-using VioletGrass.Middleware.Router;
 
-namespace VioletGrass.Middleware.Endpoints
+namespace VioletGrass.Middleware.Endpoints;
+
+internal static class ControllerEndpoint
 {
-    internal static class ControllerEndpoint
+    public const string ControllerRouteData = "controller";
+    public const string ActionRouteData = "action";
+
+    public static void MapController<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory) where TContext : Context
     {
-        public const string ControllerRouteData = "controller";
-        public const string ActionRouteData = "action";
-
-        public static void MapController<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory) where TContext : Context
+        if (endpointRouteBuilder is null)
         {
-            if (endpointRouteBuilder is null)
-            {
-                throw new ArgumentNullException(nameof(endpointRouteBuilder));
-            }
-
-            if (instanceFactory is null)
-            {
-                throw new ArgumentNullException(nameof(instanceFactory));
-            }
-
-            var instanceType = typeof(TController);
-            var controllerName = instanceType.Name;
-
-            foreach (var methodInfo in instanceType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
-            {
-                MapMethodInfo(endpointRouteBuilder, instanceFactory, controllerName, methodInfo);
-            }
+            throw new ArgumentNullException(nameof(endpointRouteBuilder));
         }
 
-        public static IEndpointBuilder<TContext> MapAction<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory, string methodName) where TContext : Context
+        if (instanceFactory is null)
         {
-            if (endpointRouteBuilder is null)
-            {
-                throw new ArgumentNullException(nameof(endpointRouteBuilder));
-            }
-
-            if (instanceFactory is null)
-            {
-                throw new ArgumentNullException(nameof(instanceFactory));
-            }
-
-            if (string.IsNullOrWhiteSpace(methodName))
-            {
-                throw new ArgumentException("method name missing", nameof(methodName));
-            }
-
-            var instanceType = typeof(TController);
-            var controllerName = string.Empty;
-            var methodInfo = instanceType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
-
-            if (methodInfo is null)
-            {
-                throw new InvalidOperationException("cannot find method in controller");
-            }
-
-            return MapMethodInfo(endpointRouteBuilder, instanceFactory, controllerName, methodInfo);
+            throw new ArgumentNullException(nameof(instanceFactory));
         }
 
-        private static IEndpointBuilder<TContext> MapMethodInfo<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory, string controllerName, MethodInfo methodInfo) where TContext : Context
+        var instanceType = typeof(TController);
+        var controllerName = instanceType.Name;
+
+        foreach (var methodInfo in instanceType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
         {
-            if (endpointRouteBuilder is null)
-            {
-                throw new ArgumentNullException(nameof(endpointRouteBuilder));
-            }
-            if (methodInfo is null)
-            {
-                throw new ArgumentNullException(nameof(methodInfo));
-            }
+            MapMethodInfo(endpointRouteBuilder, instanceFactory, controllerName, methodInfo);
+        }
+    }
 
-            var actionName = methodInfo.Name;
-
-            endpointRouteBuilder.PushPredicateContext(MatchControllerAction(controllerName, actionName));
-            var endpointBuilder = endpointRouteBuilder.Map()
-                .WithDisplayName($"{controllerName}.{actionName}")
-                .WithMiddlewareDelegate(BuildDispatcher<TContext, TController>(instanceFactory, methodInfo));
-            endpointRouteBuilder.PopPredicateContext();
-
-            return endpointBuilder;
+    public static IEndpointBuilder<TContext> MapAction<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory, string methodName) where TContext : Context
+    {
+        if (endpointRouteBuilder is null)
+        {
+            throw new ArgumentNullException(nameof(endpointRouteBuilder));
         }
 
-        private static MiddlewareDelegate<TContext> BuildDispatcher<TContext, TController>(Func<TController> instanceFactory, MethodInfo methodInfo) where TContext : Context
+        if (instanceFactory is null)
         {
-            if (methodInfo is null)
-            {
-                throw new ArgumentNullException(nameof(methodInfo));
-            }
-            // TODO: dispatch void Foo(TContext context)
-            // TODO: dispatch void Foo()
-            // TODO: dispatch void Foo(params) from Arguments
-            return async context =>
-            {
-                var arguments = context.Features.Get<Arguments>();
-
-                if (TryBuildParameters(methodInfo, arguments, out var methodInput))
-                {
-                    var instance = instanceFactory();
-
-                    var result = methodInfo.Invoke(instance, methodInput) as Task;
-
-                    await result;
-                }
-                else
-                {
-                    throw new InvalidOperationException("Could fill all method parameters");
-                }
-            };
+            throw new ArgumentNullException(nameof(instanceFactory));
         }
 
-        private static Predicate<Context> MatchControllerAction(string controllerName, string actionName)
+        if (string.IsNullOrWhiteSpace(methodName))
         {
-            if (string.IsNullOrWhiteSpace(controllerName))
-            {
-                return context =>
-                {
-                    var routeData = context.Feature<RouteData>();
+            throw new ArgumentException("method name missing", nameof(methodName));
+        }
 
-                    return routeData.Match(ActionRouteData, actionName);
-                };
+        var instanceType = typeof(TController);
+        var controllerName = string.Empty;
+        var methodInfo = instanceType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+
+        if (methodInfo is null)
+        {
+            throw new InvalidOperationException("cannot find method in controller");
+        }
+
+        return MapMethodInfo(endpointRouteBuilder, instanceFactory, controllerName, methodInfo);
+    }
+
+    private static IEndpointBuilder<TContext> MapMethodInfo<TContext, TController>(IEndpointRouteBuilder<TContext> endpointRouteBuilder, Func<TController> instanceFactory, string controllerName, MethodInfo methodInfo) where TContext : Context
+    {
+        if (endpointRouteBuilder is null)
+        {
+            throw new ArgumentNullException(nameof(endpointRouteBuilder));
+        }
+        if (methodInfo is null)
+        {
+            throw new ArgumentNullException(nameof(methodInfo));
+        }
+
+        var actionName = methodInfo.Name;
+
+        endpointRouteBuilder.PushPredicateContext(MatchControllerAction(controllerName, actionName));
+        var endpointBuilder = endpointRouteBuilder.Map()
+            .WithDisplayName($"{controllerName}.{actionName}")
+            .WithMiddlewareDelegate(BuildDispatcher<TContext, TController>(instanceFactory, methodInfo));
+        endpointRouteBuilder.PopPredicateContext();
+
+        return endpointBuilder;
+    }
+
+    private static MiddlewareDelegate<TContext> BuildDispatcher<TContext, TController>(Func<TController> instanceFactory, MethodInfo methodInfo) where TContext : Context
+    {
+        if (methodInfo is null)
+        {
+            throw new ArgumentNullException(nameof(methodInfo));
+        }
+        // TODO: dispatch void Foo(TContext context)
+        // TODO: dispatch void Foo()
+        // TODO: dispatch void Foo(params) from Arguments
+        return async context =>
+        {
+            var arguments = context.Features.Get<Arguments>();
+
+            if (TryBuildParameters(methodInfo, arguments, out var methodInput))
+            {
+                var instance = instanceFactory();
+
+                var result = methodInfo.Invoke(instance, methodInput) as Task;
+
+                await result;
             }
             else
             {
-                return context =>
-                {
-                    var routeData = context.Feature<RouteData>();
+                throw new InvalidOperationException("Could fill all method parameters");
+            }
+        };
+    }
 
-                    return routeData.Match(ControllerRouteData, controllerName) && routeData.Match(ActionRouteData, actionName);
-                };
+    private static Predicate<Context> MatchControllerAction(string controllerName, string actionName)
+    {
+        if (string.IsNullOrWhiteSpace(controllerName))
+        {
+            return context =>
+            {
+                var routeData = context.Feature<RouteData>();
+
+                return routeData.Match(ActionRouteData, actionName);
             };
         }
-
-        private static bool TryBuildParameters(MethodInfo methodInfo, Arguments argumentsFromContext, out object[] inputForMethod)
+        else
         {
-            var result = new List<object>();
-            bool success = true;
-
-            foreach (var parameterInfo in methodInfo.GetParameters())
+            return context =>
             {
-                object argumentValue = null;
+                var routeData = context.Feature<RouteData>();
 
-                if (
-                    argumentsFromContext != null &&
-                    argumentsFromContext.TryGetValue(parameterInfo.Name, out var fromContext) &&
-                    fromContext.GetType() == parameterInfo.ParameterType)
-                {
-                    argumentValue = fromContext;
-                }
-                else
-                {
-                    success = false;
-                }
+                return routeData.Match(ControllerRouteData, controllerName) && routeData.Match(ActionRouteData, actionName);
+            };
+        }
+        ;
+    }
 
-                result.Add(argumentValue);
+    private static bool TryBuildParameters(MethodInfo methodInfo, Arguments argumentsFromContext, out object[] inputForMethod)
+    {
+        var result = new List<object>();
+        bool success = true;
+
+        foreach (var parameterInfo in methodInfo.GetParameters())
+        {
+            object argumentValue = null;
+
+            if (
+                argumentsFromContext != null &&
+                argumentsFromContext.TryGetValue(parameterInfo.Name, out var fromContext) &&
+                fromContext.GetType() == parameterInfo.ParameterType)
+            {
+                argumentValue = fromContext;
+            }
+            else
+            {
+                success = false;
             }
 
-            inputForMethod = result.ToArray();
-
-            return success;
+            result.Add(argumentValue);
         }
+
+        inputForMethod = result.ToArray();
+
+        return success;
     }
 }

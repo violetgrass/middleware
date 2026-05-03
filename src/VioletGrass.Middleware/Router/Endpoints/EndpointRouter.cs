@@ -2,138 +2,137 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace VioletGrass.Middleware.Router
+namespace VioletGrass.Middleware.Router;
+
+internal partial class EndpointRouter
 {
-    internal partial class EndpointRouter
+    public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateRoutingSetupMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder) where TContext : Context
     {
-        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateRoutingSetupMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder) where TContext : Context
+        if (middlewareBuilder is null)
         {
-            if (middlewareBuilder is null)
+            throw new ArgumentNullException(nameof(middlewareBuilder));
+        }
+
+        // Setup the endpoint route builder
+        var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
+        endpointRouteBuilder.UpdateEndpointRoutes();
+
+        // return the factory
+        return RoutingSetupMiddlewareFactory;
+
+        MiddlewareDelegate<TContext> RoutingSetupMiddlewareFactory(MiddlewareDelegate<TContext> next)
+        {
+            var endpointRoutes = endpointRouteBuilder.EndpointRoutes;
+
+            return RoutingSetupMiddleware;
+
+            async Task RoutingSetupMiddleware(TContext context)
             {
-                throw new ArgumentNullException(nameof(middlewareBuilder));
+                AddEndpointFeature(context, endpointRoutes);
+
+                await next(context);
             }
+        }
+    }
 
-            // Setup the endpoint route builder
-            var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
-            endpointRouteBuilder.UpdateEndpointRoutes();
+    public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateEndpointDispatcherMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder, Action<IEndpointRouteBuilder<TContext>> configure) where TContext : Context
+    {
+        if (middlewareBuilder is null)
+        {
+            throw new ArgumentNullException(nameof(middlewareBuilder));
+        }
 
-            // return the factory
-            return RoutingSetupMiddlewareFactory;
+        if (configure is null)
+        {
+            throw new ArgumentNullException(nameof(configure));
+        }
 
-            MiddlewareDelegate<TContext> RoutingSetupMiddlewareFactory(MiddlewareDelegate<TContext> next)
+        var endpointDispatcherId = Guid.NewGuid();
+
+        var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
+        // each UseEndpoints only executes the endpoints withing the provided configuration and skip all other endpoints. If queried outside of local configuration, return the element
+        endpointRouteBuilder.PushPredicateContext(context => context.Feature<EndpointDispatcherScope>()?.DispatcherId is null || context.Feature<EndpointDispatcherScope>()?.DispatcherId == endpointDispatcherId);
+        configure(endpointRouteBuilder);
+        endpointRouteBuilder.PopPredicateContext();
+        endpointRouteBuilder.UpdateEndpointRoutes();
+
+        return EndpointDispatcherMiddlewareFactory;
+
+        MiddlewareDelegate<TContext> EndpointDispatcherMiddlewareFactory(MiddlewareDelegate<TContext> next)
+        {
+            var endpointRoutes = endpointRouteBuilder.EndpointRoutes;
+
+            return EndpointDispatcherMiddleware;
+
+            async Task EndpointDispatcherMiddleware(TContext context)
             {
-                var endpointRoutes = endpointRouteBuilder.EndpointRoutes;
+                var feature = EnsureEndpointFeature(context, endpointRoutes);
 
-                return RoutingSetupMiddleware;
+                // select only endpoints in the current configuration
+                context.Features.Set(new EndpointDispatcherScope() { DispatcherId = endpointDispatcherId });
 
-                async Task RoutingSetupMiddleware(TContext context)
+                if (feature.TryGetEndpoint(context, out var endpoint))
                 {
-                    AddEndpointFeature(context, endpointRoutes);
+                    context.Features.Set<EndpointDispatcherScope>(null);
+
+                    await endpoint.MiddlewareDelegate(context);
+                }
+                // if no endpoint is found, continue the middleware stack
+                else
+                {
+                    context.Features.Set<EndpointDispatcherScope>(null);
 
                     await next(context);
                 }
             }
         }
+    }
 
-        public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateEndpointDispatcherMiddlewareFactory<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder, Action<IEndpointRouteBuilder<TContext>> configure) where TContext : Context
+    private static DefaultEndpointRouteBuilder<TContext> EnsureEndpointRouteBuilder<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder) where TContext : Context
+    {
+        if (middlewareBuilder is null)
         {
-            if (middlewareBuilder is null)
-            {
-                throw new ArgumentNullException(nameof(middlewareBuilder));
-            }
-
-            if (configure is null)
-            {
-                throw new ArgumentNullException(nameof(configure));
-            }
-
-            var endpointDispatcherId = Guid.NewGuid();
-
-            var endpointRouteBuilder = EnsureEndpointRouteBuilder(middlewareBuilder);
-            // each UseEndpoints only executes the endpoints withing the provided configuration and skip all other endpoints. If queried outside of local configuration, return the element
-            endpointRouteBuilder.PushPredicateContext(context => context.Feature<EndpointDispatcherScope>()?.DispatcherId is null || context.Feature<EndpointDispatcherScope>()?.DispatcherId == endpointDispatcherId);
-            configure(endpointRouteBuilder);
-            endpointRouteBuilder.PopPredicateContext();
-            endpointRouteBuilder.UpdateEndpointRoutes();
-
-            return EndpointDispatcherMiddlewareFactory;
-
-            MiddlewareDelegate<TContext> EndpointDispatcherMiddlewareFactory(MiddlewareDelegate<TContext> next)
-            {
-                var endpointRoutes = endpointRouteBuilder.EndpointRoutes;
-
-                return EndpointDispatcherMiddleware;
-
-                async Task EndpointDispatcherMiddleware(TContext context)
-                {
-                    var feature = EnsureEndpointFeature(context, endpointRoutes);
-
-                    // select only endpoints in the current configuration
-                    context.Features.Set(new EndpointDispatcherScope() { DispatcherId = endpointDispatcherId });
-
-                    if (feature.TryGetEndpoint(context, out var endpoint))
-                    {
-                        context.Features.Set<EndpointDispatcherScope>(null);
-
-                        await endpoint.MiddlewareDelegate(context);
-                    }
-                    // if no endpoint is found, continue the middleware stack
-                    else
-                    {
-                        context.Features.Set<EndpointDispatcherScope>(null);
-
-                        await next(context);
-                    }
-                }
-            }
+            throw new ArgumentNullException(nameof(middlewareBuilder));
         }
 
-        private static DefaultEndpointRouteBuilder<TContext> EnsureEndpointRouteBuilder<TContext>(IMiddlewareBuilder<TContext> middlewareBuilder) where TContext : Context
+        if (!middlewareBuilder.Properties.TryGetValue(DefaultEndpointRouteBuilder<TContext>.PropertyName, out var endpointRouteBuilder))
         {
-            if (middlewareBuilder is null)
-            {
-                throw new ArgumentNullException(nameof(middlewareBuilder));
-            }
+            endpointRouteBuilder = new DefaultEndpointRouteBuilder<TContext>(middlewareBuilder.ServiceProvider);
 
-            if (!middlewareBuilder.Properties.TryGetValue(DefaultEndpointRouteBuilder<TContext>.PropertyName, out var endpointRouteBuilder))
-            {
-                endpointRouteBuilder = new DefaultEndpointRouteBuilder<TContext>(middlewareBuilder.ServiceProvider);
-
-                middlewareBuilder.Properties.Add(DefaultEndpointRouteBuilder<TContext>.PropertyName, endpointRouteBuilder);
-            }
-
-            return endpointRouteBuilder as DefaultEndpointRouteBuilder<TContext>;
+            middlewareBuilder.Properties.Add(DefaultEndpointRouteBuilder<TContext>.PropertyName, endpointRouteBuilder);
         }
 
-        private static EndpointFeature<TContext> EnsureEndpointFeature<TContext>(TContext context, IEnumerable<EndpointRoute<TContext>> endpointRoutes) where TContext : Context
+        return endpointRouteBuilder as DefaultEndpointRouteBuilder<TContext>;
+    }
+
+    private static EndpointFeature<TContext> EnsureEndpointFeature<TContext>(TContext context, IEnumerable<EndpointRoute<TContext>> endpointRoutes) where TContext : Context
+    {
+        if (context is null)
         {
-            if (context is null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            var endpointFeature = context.Features.Get<EndpointFeature<TContext>>();
-
-            if (endpointFeature == null)
-            {
-                endpointFeature = AddEndpointFeature(context, endpointRoutes);
-            }
-
-            return endpointFeature;
+            throw new ArgumentNullException(nameof(context));
         }
 
-        private static EndpointFeature<TContext> AddEndpointFeature<TContext>(TContext context, IEnumerable<EndpointRoute<TContext>> endpointRoutes) where TContext : Context
+        var endpointFeature = context.Features.Get<EndpointFeature<TContext>>();
+
+        if (endpointFeature == null)
         {
-            if (context is null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            var feature = new EndpointFeature<TContext>(endpointRoutes);
-
-            var endpointFeature = context.Features.Set(feature);
-
-            return endpointFeature;
+            endpointFeature = AddEndpointFeature(context, endpointRoutes);
         }
+
+        return endpointFeature;
+    }
+
+    private static EndpointFeature<TContext> AddEndpointFeature<TContext>(TContext context, IEnumerable<EndpointRoute<TContext>> endpointRoutes) where TContext : Context
+    {
+        if (context is null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
+
+        var feature = new EndpointFeature<TContext>(endpointRoutes);
+
+        var endpointFeature = context.Features.Set(feature);
+
+        return endpointFeature;
     }
 }
