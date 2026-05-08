@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Xunit;
 
-namespace VioletGrass.Middleware.Test;
+namespace Violet.Middleware.Test;
 
 public class MiddlewareBuilderTest
 {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace VioletGrass.Middleware.Router;
+namespace Violet.Middleware.Router;
 
 internal partial class EndpointRouter
 {

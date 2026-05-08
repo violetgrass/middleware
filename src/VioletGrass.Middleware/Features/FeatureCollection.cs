@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace VioletGrass.Middleware.Features;
+namespace Violet.Middleware.Features;
 
 public class FeatureCollection : IEnumerable<KeyValuePair<Type, object>>
 {

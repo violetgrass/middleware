@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public interface IEndpointBuilder<TContext> where TContext : Context
 {

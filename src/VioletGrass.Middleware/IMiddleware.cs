@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public interface IMiddleware<TContext> where TContext : Context
 {

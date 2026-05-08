@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Xunit;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public class TestMiddleware<TContext> : IMiddleware<TContext> where TContext : Context
 {

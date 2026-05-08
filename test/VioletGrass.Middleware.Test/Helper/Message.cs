@@ -1,4 +1,4 @@
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public class Message
 {

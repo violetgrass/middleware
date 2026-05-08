@@ -2,9 +2,9 @@ using System;
 
 using Newtonsoft.Json;
 
-using VioletGrass.Middleware.Features;
+using Violet.Middleware.Features;
 
-namespace VioletGrass.Middleware.Serializer.Json;
+namespace Violet.Middleware.Serializer.Json;
 
 internal static class JsonArgumentSerializer
 {

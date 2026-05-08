@@ -1,6 +1,6 @@
 using System;
 
-namespace VioletGrass.Middleware.Router;
+namespace Violet.Middleware.Router;
 
 public class EndpointRoute<TContext> where TContext : Context
 {

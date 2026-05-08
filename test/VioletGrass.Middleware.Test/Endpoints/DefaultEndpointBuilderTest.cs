@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 using Xunit;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public class DefaultEndpointBuilderTest
 {

@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 using Xunit;
 
-namespace VioletGrass.Middleware.Router;
+namespace Violet.Middleware.Router;
 
 public class StringRouterTest
 {

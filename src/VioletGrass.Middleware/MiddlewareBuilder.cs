@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 
 public class MiddlewareBuilder<TContext> : IMiddlewareBuilder<TContext> where TContext : Context

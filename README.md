@@ -15,7 +15,7 @@ VioletGrass.Middleware is a universal middleware pipeline intended to be added t
 
 ## Examples
 
-All example should work under namespace `using VioletGrass.Middleware` (after installing NuGet package `VioletGrass.Middleware`)
+All example should work under namespace `using Violet.Middleware` (after installing NuGet package `VioletGrass.Middleware`)
 
 ### Creation of a simple stack only middleware
 

@@ -1,6 +1,6 @@
-﻿using VioletGrass.Middleware.Features;
+﻿using Violet.Middleware.Features;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public class Context
 {

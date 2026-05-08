@@ -1,11 +1,11 @@
 using System.Text;
 using System.Threading.Tasks;
 
-using VioletGrass.Middleware.Features;
+using Violet.Middleware.Features;
 
 using Xunit;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public class ControllerEndpointTest
 {

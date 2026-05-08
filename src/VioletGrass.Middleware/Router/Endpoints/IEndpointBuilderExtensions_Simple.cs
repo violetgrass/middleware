@@ -1,6 +1,6 @@
 using System;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public static partial class IEndpointBuilderExtensions
 {

@@ -1,8 +1,8 @@
 ﻿using System;
 
-using VioletGrass.Middleware.Serializer.Json;
+using Violet.Middleware.Serializer.Json;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public static class IMiddlewareBuilderExtensions
 {

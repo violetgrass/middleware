@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public class Endpoint<TContext> where TContext : Context
 {

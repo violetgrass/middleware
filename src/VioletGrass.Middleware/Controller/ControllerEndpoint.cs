@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 
-using VioletGrass.Middleware.Features;
+using Violet.Middleware.Features;
 
-namespace VioletGrass.Middleware.Endpoints;
+namespace Violet.Middleware.Endpoints;
 
 internal static class ControllerEndpoint
 {

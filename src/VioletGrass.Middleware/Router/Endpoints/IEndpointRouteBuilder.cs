@@ -1,6 +1,6 @@
 using System;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public interface IEndpointRouteBuilder<TContext> where TContext : Context
 {

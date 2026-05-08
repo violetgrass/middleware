@@ -1,8 +1,8 @@
 using System;
 
-using VioletGrass.Middleware.Router;
+using Violet.Middleware.Router;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public static partial class IMiddlewareBuilderExtensions
 {

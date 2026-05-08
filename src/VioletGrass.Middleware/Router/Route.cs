@@ -1,6 +1,6 @@
 using System;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public class Route<TContext> where TContext : Context
 {

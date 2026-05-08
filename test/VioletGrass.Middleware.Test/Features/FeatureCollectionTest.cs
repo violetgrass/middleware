@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 using Xunit;
 
-namespace VioletGrass.Middleware.Features;
+namespace Violet.Middleware.Features;
 
 public class FeatureCollectionTest
 {

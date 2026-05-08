@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace VioletGrass.Middleware.Router;
+namespace Violet.Middleware.Router;
 
 internal static class InternalRouter
 {

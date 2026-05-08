@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public static partial class IMiddlewareBuilderExtensions
 {

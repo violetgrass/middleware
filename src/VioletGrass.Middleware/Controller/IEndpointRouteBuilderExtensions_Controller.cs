@@ -1,8 +1,8 @@
 using System;
 
-using VioletGrass.Middleware.Endpoints;
+using Violet.Middleware.Endpoints;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public static partial class IEndpointRouteBuilderExtensions
 {

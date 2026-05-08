@@ -1,6 +1,6 @@
 using System;
 
-namespace VioletGrass.Middleware.Router;
+namespace Violet.Middleware.Router;
 
 internal class EndpointDispatcherScope
 {

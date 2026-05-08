@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace VioletGrass.Middleware;
+namespace Violet.Middleware;
 
 public class Tracer
 {

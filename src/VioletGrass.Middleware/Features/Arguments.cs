@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace VioletGrass.Middleware.Features;
+namespace Violet.Middleware.Features;
 
 public class Arguments
 {
