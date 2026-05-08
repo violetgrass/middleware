@@ -1,0 +1,14 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/Violet.Middleware.Serializer.Json/Violet.Middleware.Serializer.Json.csproj" />
+    <Project Path="src/Violet.Middleware/Violet.Middleware.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Violet.Middleware.Test/Violet.Middleware.Test.csproj" />
+  </Folder>
+</Solution>

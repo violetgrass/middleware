@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VioletGrass.Middleware\VioletGrass.Middleware.csproj" />
+    <ProjectReference Include="..\Violet.Middleware\Violet.Middleware.csproj" />
   </ItemGroup>
 
   <ItemGroup>
