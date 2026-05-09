@@ -24,19 +24,23 @@ public class FeatureCollection : IEnumerable<KeyValuePair<Type, object>>
 
     public TFeature Get<TFeature>() where TFeature : class
     {
-        TFeature result = default;
+        TFeature? result = default;
 
         if (_features.TryGetValue(typeof(TFeature), out var entry))
         {
             result = entry as TFeature;
         }
 
-        return result;
+        return result!;
     }
 
     public TFeature Set<TFeature>(TFeature instance) where TFeature : class
     {
         _features[typeof(TFeature)] = instance;
         return instance;
+    }
+    public void Remove<TFeature>() where TFeature : class
+    {
+        _features.Remove(typeof(TFeature));
     }
 }

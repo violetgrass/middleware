@@ -9,7 +9,7 @@ public interface IMiddlewareBuilder<TContext> where TContext : Context
 
     IDictionary<string, object> Properties { get; }
 
-    IServiceProvider ServiceProvider { get; }
+    IServiceProvider? ServiceProvider { get; }
 
     IMiddlewareBuilder<TContext> New();
 

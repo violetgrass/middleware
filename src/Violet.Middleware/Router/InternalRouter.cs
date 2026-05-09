@@ -79,9 +79,10 @@ internal static class InternalRouter
             {
                 branchBuilder.Properties.Add(property);
 
-                var routeContextAware = property.Value as IRouteContextAware<TContext>;
-
-                routeContextAware.PushRouteContext(route);
+                if (property.Value is IRouteContextAware<TContext> routeContextAware)
+                {
+                    routeContextAware.PushRouteContext(route);
+                }
             }
 
             route.MiddlewareBuilderForRoute(branchBuilder);
@@ -92,9 +93,10 @@ internal static class InternalRouter
             // unregister route context with relevant features
             foreach (var property in parentBuilder.Properties.Where(x => x.Value is IRouteContextAware<TContext>))
             {
-                var routeContextAware = property.Value as IRouteContextAware<TContext>;
-
-                routeContextAware.PopRouteContext();
+                if (property.Value is IRouteContextAware<TContext> routeContextAware)
+                {
+                    routeContextAware.PopRouteContext();
+                }
             }
 
             return new MiddlewareBranch<TContext>(route.IsApplicable, branchStack);

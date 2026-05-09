@@ -101,9 +101,16 @@ internal static class ControllerEndpoint
             {
                 var instance = instanceFactory();
 
-                var result = methodInfo.Invoke(instance, methodInput) as Task;
+                var result = methodInfo.Invoke(instance, methodInput);
 
-                await result;
+                if (result is Task taskResult)
+                {
+                    await taskResult;
+                }
+                else
+                {
+                    await Task.CompletedTask;
+                }
             }
             else
             {
@@ -135,18 +142,19 @@ internal static class ControllerEndpoint
         ;
     }
 
-    private static bool TryBuildParameters(MethodInfo methodInfo, Arguments argumentsFromContext, out object[] inputForMethod)
+    private static bool TryBuildParameters(MethodInfo methodInfo, Arguments argumentsFromContext, out object?[] inputForMethod)
     {
-        var result = new List<object>();
+        var result = new List<object?>();
         bool success = true;
 
         foreach (var parameterInfo in methodInfo.GetParameters())
         {
-            object argumentValue = null;
+            object? argumentValue = null;
 
             if (
+                parameterInfo?.Name is not null and var parameterName &&
                 argumentsFromContext != null &&
-                argumentsFromContext.TryGetValue(parameterInfo.Name, out var fromContext) &&
+                argumentsFromContext.TryGetValue(parameterName, out var fromContext) &&
                 fromContext.GetType() == parameterInfo.ParameterType)
             {
                 argumentValue = fromContext;

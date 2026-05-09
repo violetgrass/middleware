@@ -96,10 +96,10 @@ public partial class IMiddlewareBuilderExtensionsTest
 
         // act
         var messageHandler = builder
-            .Use(next => async context => { list.Add("A"); next(context); })
+            .Use(next => async context => { list.Add("A"); await next(context); })
             .Use(async context => list.Add("B"))
             .Run(async context => list.Add("C"))
-            .Use(next => async context => { list.Add("D"); next(context); })
+            .Use(next => async context => { list.Add("D"); await next(context); })
             .Build();
 
         var x = new OtherContext("bar");

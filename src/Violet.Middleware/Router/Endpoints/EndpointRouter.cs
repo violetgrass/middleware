@@ -73,14 +73,17 @@ internal partial class EndpointRouter
 
                 if (feature.TryGetEndpoint(context, out var endpoint))
                 {
-                    context.Features.Set<EndpointDispatcherScope>(null);
+                    context.Features.Remove<EndpointDispatcherScope>();
 
-                    await endpoint.MiddlewareDelegate(context);
+                    if (endpoint.MiddlewareDelegate is not null)
+                    {
+                        await endpoint.MiddlewareDelegate(context);
+                    }
                 }
                 // if no endpoint is found, continue the middleware stack
                 else
                 {
-                    context.Features.Set<EndpointDispatcherScope>(null);
+                    context.Features.Remove<EndpointDispatcherScope>();
 
                     await next(context);
                 }
@@ -102,7 +105,7 @@ internal partial class EndpointRouter
             middlewareBuilder.Properties.Add(DefaultEndpointRouteBuilder<TContext>.PropertyName, endpointRouteBuilder);
         }
 
-        return endpointRouteBuilder as DefaultEndpointRouteBuilder<TContext>;
+        return endpointRouteBuilder as DefaultEndpointRouteBuilder<TContext> ?? throw new InvalidOperationException($"The endpoint route builder could not be found in the middleware builder properties.");
     }
 
     private static EndpointFeature<TContext> EnsureEndpointFeature<TContext>(TContext context, IEnumerable<EndpointRoute<TContext>> endpointRoutes) where TContext : Context

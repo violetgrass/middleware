@@ -4,7 +4,7 @@ namespace Violet.Middleware;
 
 public interface IEndpointRouteBuilder<TContext> where TContext : Context
 {
-    IServiceProvider ServiceProvider { get; }
+    IServiceProvider? ServiceProvider { get; }
 
     void PushPredicateContext(Predicate<TContext> predicate);
     void PopPredicateContext();

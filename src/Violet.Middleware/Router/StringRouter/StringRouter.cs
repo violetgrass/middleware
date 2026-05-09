@@ -42,7 +42,7 @@ public static class StringRouter
         };
     }
 
-    public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateRoutingKeyMiddlewareFactory<TContext>(Func<TContext, string> routingKeySelector, string[] routePatterns = null) where TContext : Context
+    public static Func<MiddlewareDelegate<TContext>, MiddlewareDelegate<TContext>> CreateRoutingKeyMiddlewareFactory<TContext>(Func<TContext, string> routingKeySelector, string[]? routePatterns = null) where TContext : Context
     {
         if (routingKeySelector == null)
         {
@@ -105,18 +105,21 @@ public static class StringRouter
             throw new ArgumentNullException(nameof(routeData));
         }
 
-        foreach (var routePattern in regexPatterns)
+        if (routeData.OriginalRoutingKey is not null)
         {
-            var match = routePattern.Match(routeData.OriginalRoutingKey);
-
-            if (match.Success)
+            foreach (var routePattern in regexPatterns)
             {
-                foreach (var groupName in routePattern.GetGroupNames())
-                {
-                    routeData.Add(groupName, match.Groups[groupName].Value);
-                }
+                var match = routePattern.Match(routeData.OriginalRoutingKey);
 
-                break;
+                if (match.Success)
+                {
+                    foreach (var groupName in routePattern.GetGroupNames())
+                    {
+                        routeData.Add(groupName, match.Groups[groupName].Value);
+                    }
+
+                    break;
+                }
             }
         }
     }

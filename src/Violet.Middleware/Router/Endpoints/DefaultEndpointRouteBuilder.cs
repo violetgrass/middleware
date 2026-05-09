@@ -11,11 +11,11 @@ public class DefaultEndpointRouteBuilder<TContext> : IEndpointRouteBuilder<TCont
 
     private List<EndpointRoute<TContext>> _endpointRoutes { get; } = new List<EndpointRoute<TContext>>();
 
-    public IEnumerable<EndpointRoute<TContext>> EndpointRoutes { get; private set; } = null;
+    public IEnumerable<EndpointRoute<TContext>> EndpointRoutes { get; private set; } = [];
 
-    public IServiceProvider ServiceProvider { get; }
+    public IServiceProvider? ServiceProvider { get; }
 
-    public DefaultEndpointRouteBuilder(IServiceProvider serviceProvider)
+    public DefaultEndpointRouteBuilder(IServiceProvider? serviceProvider)
     {
         ServiceProvider = serviceProvider;
     }

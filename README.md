@@ -4,7 +4,7 @@ VioletGrass.Middleware is a universal middleware pipeline intended to be added t
 
 ![build](https://github.com/violetgrass/middleware/workflows/Build-CI/badge.svg)
 ![license:MIT](https://img.shields.io/github/license/violetgrass/middleware?style=flat-square)
-[![Nuget](https://img.shields.io/nuget/v/VioletGrass.Middleware?style=flat-square)](https://www.nuget.org/packages/VioletGrass.Middleware/)
+[![Nuget](https://img.shields.io/nuget/v/Violet.Middleware?style=flat-square)](https://www.nuget.org/packages/Violet.Middleware/)
 
 ## Features
 
@@ -15,7 +15,7 @@ VioletGrass.Middleware is a universal middleware pipeline intended to be added t
 
 ## Examples
 
-All example should work under namespace `using Violet.Middleware` (after installing NuGet package `VioletGrass.Middleware`)
+All example should work under namespace `using Violet.Middleware` (after installing NuGet package `Violet.Middleware`)
 
 ### Creation of a simple stack only middleware
 

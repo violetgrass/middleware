@@ -12,5 +12,5 @@ public class EndpointRoute<TContext> where TContext : Context
 
     public Predicate<TContext>[] Predicates { get; set; }
     public IEndpointBuilder<TContext> EndpointBuilder { get; }
-    public Endpoint<TContext> Endpoint { get; set; }
+    public Endpoint<TContext>? Endpoint { get; set; }
 }

@@ -11,9 +11,9 @@ public class MiddlewareBuilder<TContext> : IMiddlewareBuilder<TContext> where TC
 
     public IDictionary<string, object> Properties { get; } = new Dictionary<string, object>();
 
-    public IServiceProvider ServiceProvider { get; }
+    public IServiceProvider? ServiceProvider { get; }
 
-    public MiddlewareBuilder(IServiceProvider serviceProvider = default)
+    public MiddlewareBuilder(IServiceProvider? serviceProvider = default)
     {
         ServiceProvider = serviceProvider;
     }

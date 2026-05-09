@@ -4,15 +4,15 @@ namespace Violet.Middleware;
 
 public class Endpoint<TContext> where TContext : Context
 {
-    public Endpoint(string displayName, IList<object> metadata, MiddlewareDelegate<TContext> middlewareDelegate)
+    public Endpoint(string? displayName, IList<object> metadata, MiddlewareDelegate<TContext>? middlewareDelegate)
     {
         DisplayName = displayName;
         Metadata = metadata;
         MiddlewareDelegate = middlewareDelegate;
     }
 
-    public string DisplayName { get; set; }
+    public string? DisplayName { get; set; }
     public IList<object> Metadata { get; }
 
-    public MiddlewareDelegate<TContext> MiddlewareDelegate { get; set; }
+    public MiddlewareDelegate<TContext>? MiddlewareDelegate { get; set; }
 }

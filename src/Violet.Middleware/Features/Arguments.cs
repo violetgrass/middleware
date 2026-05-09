@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Violet.Middleware.Features;
 
@@ -12,6 +13,6 @@ public class Arguments
         return this;
     }
 
-    public bool TryGetValue(string name, out object value)
+    public bool TryGetValue(string name, [NotNullWhen(returnValue: true)] out object? value)
         => _arguments.TryGetValue(name, out value);
 }
