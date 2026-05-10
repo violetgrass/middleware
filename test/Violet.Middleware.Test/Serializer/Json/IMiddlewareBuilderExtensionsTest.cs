@@ -10,7 +10,7 @@ public partial class IMiddlewareBuilderExtensionsTest
     {
         public Demo Message { get; private set; }
 
-        public Task Foo(Demo message)
+        public Task Foo([FromArgument] Demo message)
         {
             Message = message;
             return Task.CompletedTask;

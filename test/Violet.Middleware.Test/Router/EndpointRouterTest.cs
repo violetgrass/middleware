@@ -230,9 +230,9 @@ public class EndpointRouterTest
             .UseRoutingKey(c => c.Feature<string>(), @"^(?<xyz>.*)/(?<action>.*)$")
             .UseEndpoints(endpoints =>
             {
-                endpoints.Map("X", ([RouteData] string xyz) => { Assert.Equal("x", xyz); result = "X"; })
+                endpoints.Map("X", ([FromRouteData] string xyz) => { Assert.Equal("x", xyz); result = "X"; })
                     .Requires(StringRouter.Match("action", "X"));
-                endpoints.Map("Y", ([RouteData] string xyz) => { Assert.Equal("x", xyz); result = "Y"; })
+                endpoints.Map("Y", ([FromRouteData] string xyz) => { Assert.Equal("x", xyz); result = "Y"; })
                     .Requires(StringRouter.Match("action", "Y"));
             })
             .Build();

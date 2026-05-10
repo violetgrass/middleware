@@ -16,8 +16,6 @@ public class MiddlewareDelegateOptions<TContext> where TContext : Context
     public IServiceProvider? ServiceProvider { get; init; }
 }
 
-
-// TODO: migrate controller dispatch to here
 public static class MiddlewareDelegateFactory
 {
     public static MiddlewareDelegate<TContext> Create<TContext>(Delegate handler, MiddlewareDelegateOptions<TContext> options) where TContext : Context
@@ -29,7 +27,9 @@ public static class MiddlewareDelegateFactory
 
         return Create<TContext>(target, method, options);
     }
-    public static MiddlewareDelegate<TContext> Create<TContext>(object? target, MethodInfo handler, MiddlewareDelegateOptions<TContext> options) where TContext : Context
+    public static MiddlewareDelegate<TContext> Create<TContext>(object? instance, MethodInfo handler, MiddlewareDelegateOptions<TContext> options) where TContext : Context
+        => CreateWithInstanceFactory<TContext>(() => instance, handler, options);
+    public static MiddlewareDelegate<TContext> CreateWithInstanceFactory<TContext>(Func<object?> instanceFactory, MethodInfo handler, MiddlewareDelegateOptions<TContext> options) where TContext : Context
     {
         if (handler == null) throw new ArgumentNullException(nameof(handler));
         if (options == null) throw new ArgumentNullException(nameof(options));
@@ -83,7 +83,9 @@ public static class MiddlewareDelegateFactory
             }
             else
             {
-                result = handler.Invoke(target, parameters);
+                var instance = instanceFactory();
+
+                result = handler.Invoke(instance, parameters);
             }
 
             if (result is Task taskResult)

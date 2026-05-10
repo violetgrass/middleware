@@ -13,7 +13,7 @@ public class ControllerEndpointTest
     {
         private readonly StringBuilder _builder = new StringBuilder();
         public string Trace => _builder.ToString();
-        public Task Foo(string a, string b)
+        public Task Foo([FromArgument] string a, [FromArgument] string b)
         {
             _builder.Append(a);
             _builder.Append(b);

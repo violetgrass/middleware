@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Threading.Tasks;
 
-using Violet.Middleware.Features;
+using Violet.Middleware.Handler;
 
 namespace Violet.Middleware.Endpoints;
 
@@ -27,7 +25,7 @@ internal static class ControllerEndpoint
         var instanceType = typeof(TController);
         var controllerName = instanceType.Name;
 
-        foreach (var methodInfo in instanceType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var methodInfo in instanceType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
         {
             MapMethodInfo(endpointRouteBuilder, instanceFactory, controllerName, methodInfo);
         }
@@ -78,45 +76,18 @@ internal static class ControllerEndpoint
         endpointRouteBuilder.PushPredicateContext(MatchControllerAction(controllerName, actionName));
         var endpointBuilder = endpointRouteBuilder.Map()
             .WithDisplayName($"{controllerName}.{actionName}")
-            .WithMiddlewareDelegate(BuildDispatcher<TContext, TController>(instanceFactory, methodInfo));
+            .WithMiddlewareDelegate(MiddlewareDelegateFactory.CreateWithInstanceFactory<TContext>(() => instanceFactory(), methodInfo, new MiddlewareDelegateOptions<TContext>()
+            {
+                ParameterResolverFactories =
+                {
+                    new DependencyInjectionResolverFactory<TContext>(),
+                    new ArgumentsParameterResolverFactory<TContext>(),
+                }
+            }));
+        //.WithMiddlewareDelegate(BuildDispatcher<TContext, TController>(instanceFactory, methodInfo));
         endpointRouteBuilder.PopPredicateContext();
 
         return endpointBuilder;
-    }
-
-    private static MiddlewareDelegate<TContext> BuildDispatcher<TContext, TController>(Func<TController> instanceFactory, MethodInfo methodInfo) where TContext : Context
-    {
-        if (methodInfo is null)
-        {
-            throw new ArgumentNullException(nameof(methodInfo));
-        }
-        // TODO: dispatch void Foo(TContext context)
-        // TODO: dispatch void Foo()
-        // TODO: dispatch void Foo(params) from Arguments
-        return async context =>
-        {
-            var arguments = context.Features.Get<Arguments>();
-
-            if (TryBuildParameters(methodInfo, arguments, out var methodInput))
-            {
-                var instance = instanceFactory();
-
-                var result = methodInfo.Invoke(instance, methodInput);
-
-                if (result is Task taskResult)
-                {
-                    await taskResult;
-                }
-                else
-                {
-                    await Task.CompletedTask;
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("Could fill all method parameters");
-            }
-        };
     }
 
     private static Predicate<Context> MatchControllerAction(string controllerName, string actionName)
@@ -139,36 +110,5 @@ internal static class ControllerEndpoint
                 return routeData.Match(ControllerRouteData, controllerName) && routeData.Match(ActionRouteData, actionName);
             };
         }
-        ;
-    }
-
-    private static bool TryBuildParameters(MethodInfo methodInfo, Arguments argumentsFromContext, out object?[] inputForMethod)
-    {
-        var result = new List<object?>();
-        bool success = true;
-
-        foreach (var parameterInfo in methodInfo.GetParameters())
-        {
-            object? argumentValue = null;
-
-            if (
-                parameterInfo?.Name is not null and var parameterName &&
-                argumentsFromContext != null &&
-                argumentsFromContext.TryGetValue(parameterName, out var fromContext) &&
-                fromContext.GetType() == parameterInfo.ParameterType)
-            {
-                argumentValue = fromContext;
-            }
-            else
-            {
-                success = false;
-            }
-
-            result.Add(argumentValue);
-        }
-
-        inputForMethod = result.ToArray();
-
-        return success;
     }
 }
