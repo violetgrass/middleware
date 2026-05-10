@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 
+using Violet.Middleware.Features;
+
 using Xunit;
 
 namespace Violet.Middleware;
@@ -10,7 +12,7 @@ public partial class IMiddlewareBuilderExtensionsTest
     {
         public Demo Message { get; private set; }
 
-        public Task Foo([FromArgument] Demo message)
+        public Task Foo([From<Arguments>] Demo message)
         {
             Message = message;
             return Task.CompletedTask;

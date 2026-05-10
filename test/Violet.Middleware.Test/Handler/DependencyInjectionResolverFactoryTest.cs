@@ -78,14 +78,14 @@ public class DependencyInjectionResolverFactoryTest
             ServiceProvider = sp,
             ParameterResolverFactories =
             {
-                new ArgumentsParameterResolverFactory<Context>(),
+                new GenericParameterResolverFactory<Context>(),
                 new DependencyInjectionResolverFactory<Context>(),
             }
         };
         var counter = 0;
 
         // act
-        var del = MiddlewareDelegateFactory.Create<Context>(async ([FromArgument] string arg1, DependencyInjectionResolverFactoryTest x) => { Assert.Equal("Hello World", arg1); Assert.NotNull(x); counter++; }, options);
+        var del = MiddlewareDelegateFactory.Create<Context>(async ([From<Arguments>] string arg1, DependencyInjectionResolverFactoryTest x) => { Assert.Equal("Hello World", arg1); Assert.NotNull(x); counter++; }, options);
         await del.Invoke(context);
 
         // assert

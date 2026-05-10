@@ -19,13 +19,13 @@ public class ArgumentsParameterResolverFactoryTest
         {
             ParameterResolverFactories =
             {
-                new ArgumentsParameterResolverFactory<Context>(),
+                new GenericParameterResolverFactory<Context>(),
             }
         };
         var counter = 0;
 
         // act
-        var del = MiddlewareDelegateFactory.Create<Context>(async ([FromArgument("arg1")] int arg1) => { Assert.Equal(42, arg1); counter++; }, options);
+        var del = MiddlewareDelegateFactory.Create<Context>(async ([From<Arguments>("arg1")] int arg1) => { Assert.Equal(42, arg1); counter++; }, options);
         await del.Invoke(context);
 
         // assert
@@ -41,13 +41,13 @@ public class ArgumentsParameterResolverFactoryTest
         {
             ParameterResolverFactories =
             {
-                new ArgumentsParameterResolverFactory<Context>(),
+                new GenericParameterResolverFactory<Context>(),
             }
         };
         var counter = 0;
 
         // act
-        var del = MiddlewareDelegateFactory.Create<Context>(async ([FromArgument("arg55")] int arg1) => { counter++; }, options);
+        var del = MiddlewareDelegateFactory.Create<Context>(async ([From<Arguments>("arg55")] int arg1) => { counter++; }, options);
         await Assert.ThrowsAsync<ArgumentException>(async () =>
         {
             await del.Invoke(context);
@@ -66,13 +66,13 @@ public class ArgumentsParameterResolverFactoryTest
         {
             ParameterResolverFactories =
             {
-                new ArgumentsParameterResolverFactory<Context>(),
+                new GenericParameterResolverFactory<Context>(),
             }
         };
         var counter = 0;
 
         // act
-        var del = MiddlewareDelegateFactory.Create<Context>(async ([FromArgument("arg1")] int arg1, [FromArgument("arg2")] string arg2) => { Assert.Equal(42, arg1); Assert.Equal("blub", arg2); counter++; }, options);
+        var del = MiddlewareDelegateFactory.Create<Context>(async ([From<Arguments>("arg1")] int arg1, [From<Arguments>("arg2")] string arg2) => { Assert.Equal(42, arg1); Assert.Equal("blub", arg2); counter++; }, options);
         await del.Invoke(context);
 
         // assert
@@ -88,13 +88,13 @@ public class ArgumentsParameterResolverFactoryTest
         {
             ParameterResolverFactories =
             {
-                new ArgumentsParameterResolverFactory<Context>(),
+                new GenericParameterResolverFactory<Context>(),
             }
         };
         var counter = 0;
 
         // act
-        var del = MiddlewareDelegateFactory.Create<Context>(async ([FromArgument] int arg4) => { Assert.Equal(42, arg4); counter++; }, options);
+        var del = MiddlewareDelegateFactory.Create<Context>(async ([From<Arguments>] int arg4) => { Assert.Equal(42, arg4); counter++; }, options);
         await del.Invoke(context);
 
         // assert

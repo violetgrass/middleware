@@ -76,15 +76,7 @@ internal static class ControllerEndpoint
         endpointRouteBuilder.PushPredicateContext(MatchControllerAction(controllerName, actionName));
         var endpointBuilder = endpointRouteBuilder.Map()
             .WithDisplayName($"{controllerName}.{actionName}")
-            .WithMiddlewareDelegate(MiddlewareDelegateFactory.CreateWithInstanceFactory<TContext>(() => instanceFactory(), methodInfo, new MiddlewareDelegateOptions<TContext>()
-            {
-                ParameterResolverFactories =
-                {
-                    new DependencyInjectionResolverFactory<TContext>(),
-                    new ArgumentsParameterResolverFactory<TContext>(),
-                }
-            }));
-        //.WithMiddlewareDelegate(BuildDispatcher<TContext, TController>(instanceFactory, methodInfo));
+            .WithMiddlewareDelegate(MiddlewareDelegateFactory.CreateWithInstanceFactory<TContext>(() => instanceFactory(), methodInfo, new MiddlewareDelegateOptions<TContext>()));
         endpointRouteBuilder.PopPredicateContext();
 
         return endpointBuilder;

@@ -9,8 +9,7 @@ public class MiddlewareDelegateOptions<TContext> where TContext : Context
 {
     public IList<IParameterResolverFactory<TContext>> ParameterResolverFactories { get; init; } = new List<IParameterResolverFactory<TContext>>()
     {
-        new ArgumentsParameterResolverFactory<TContext>(),
-        new RouteDataParameterResolverFactory<TContext>(),
+        new GenericParameterResolverFactory<TContext>(),
         new DependencyInjectionResolverFactory<TContext>(),
     };
     public IServiceProvider? ServiceProvider { get; init; }
