@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Violet.Middleware;
 
@@ -14,4 +15,7 @@ public class RouteData
     {
         _data[groupName] = value;
     }
+
+    public bool TryGetValue(string key, [NotNullWhen(returnValue: true)] out string? value)
+        => _data.TryGetValue(key, out value);
 }

@@ -166,7 +166,6 @@ public class EndpointRouterTest
         Assert.Equal("Y", result);
     }
 
-
     [Theory]
     [InlineData("A", "ABC", "A_Endpoint")]
     [InlineData("B", "ABC", "B_Endpoint")]
@@ -218,6 +217,31 @@ public class EndpointRouterTest
         Assert.Equal(expectedEndpointName, selectedEndpoint?.DisplayName);
         Assert.Equal(expectedEndpointName, actualInvokedEndpoint);
         Assert.Equal(expectedTrace, path.Trace);
+    }
+
+    [Fact]
+    public async Task IEndpointRouteBuilder_Map_Delegate()
+    {
+        // arrange
+        string result = "";
+
+        var stack = new MiddlewareBuilder<Context>()
+            .UseRouting()
+            .UseRoutingKey(c => c.Feature<string>(), @"^(?<xyz>.*)/(?<action>.*)$")
+            .UseEndpoints(endpoints =>
+            {
+                endpoints.Map("X", ([RouteData] string xyz) => { Assert.Equal("x", xyz); result = "X"; })
+                    .Requires(StringRouter.Match("action", "X"));
+                endpoints.Map("Y", ([RouteData] string xyz) => { Assert.Equal("x", xyz); result = "Y"; })
+                    .Requires(StringRouter.Match("action", "Y"));
+            })
+            .Build();
+
+        // act
+        await stack(new Context("x/Y"));
+
+        // assert
+        Assert.Equal("Y", result);
     }
 
 }
