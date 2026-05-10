@@ -177,6 +177,29 @@ await stack(new Context("action-B"));
 
 Public APIs: `IMiddlewareBuilderExtensions` (UseRouting and UseEndpoints), `IEndpointRouteBuilder`, `IEndpointBuilder<TContext>`, `Endpoint<TContext>` `IEndpointRouteBuilderExtensions` (MapLambda), `EndpointFeature<TContext>` (TryGetEndpoint)
 
+### Endpoints with normal functions as handlers
+
+Normal written functions do not receive a parameter `TContext` as input. Instead, they are have normal parameters like `int count`. To make this transition as easy as possible, endpoint routing supports providing an arbitrary delegate.
+
+````csharp
+var stack = new MiddlewareBuilder<Context>()
+    .UseRouting()
+    .UseRoutingKey(c => c.Feature<string>(), @"^(?<xyz>.*)/(?<action>.*)$") // feature of type string 😂 .. useful for demos
+    .UseEndpoints(endpoints =>
+    {
+        // specify from white feature (here RouteData) to take parameter values from
+        endpoints.Map("X", ([From<RouteData>] string xyz) => { /* ... */ })
+            .Requires(StringRouter.Match("action", "X"));
+        endpoints.Map("Y", ([From<RouteData>] string xyz) => { /* ... */ })
+            .Requires(StringRouter.Match("action", "Y"));
+    })
+    .Build();
+
+await stack(new Context("x/Y"));
+````
+
+Public APIs: `MiddlewareDelegateFactory` which converts `MethodInfo` and `Delegate` into `MiddlewareDelegate`. Features expose their data for endpoint parameterizations using `IParameterResolverSource`. Off-the-shelf features like `RouteData` and `Arguments` support this out of the box. The `[From<Feature>]` parameter attribute helps with mapping source data to parameters. Dependency Injection is also supported searching by type (instead of `[From<Feature>]`).
+
 ### 🏃‍♂️ Experimental ControllerEndpoint
 
 ***Note**: This concept is a work in progress. The interface is not stable and may change on minor releases*
